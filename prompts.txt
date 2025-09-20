@@ -1,0 +1,12 @@
+I want a golang script to run load tests on my mqtt brokers.
+
+I want to pass the following configs through ENV variable:
+- testCode
+- totalUsers
+- rampUpRate
+- qos
+- messageSizeKB
+- publishRatePerSec
+- testDurationMins
+
+Read the number of available brokers in brokers.json file under app/ and then start load testing as per the configuration

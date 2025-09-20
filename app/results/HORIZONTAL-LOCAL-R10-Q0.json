@@ -1,0 +1,36 @@
+{
+  "testCode": "HORIZONTAL-LOCAL-R10-Q0",
+  "brokerName": "",
+  "brokerHost": "",
+  "brokerPort": 0,
+  "testConfiguration": {
+    "totalUsers": 1000,
+    "rampUpRate": 10,
+    "qos": 0,
+    "messageSizeKB": 10,
+    "publishRatePerSec": 1,
+    "testDurationMins": 5
+  },
+  "testMetrics": {
+    "totalMessages": 299001,
+    "successfulPubs": 299001,
+    "failedPubs": 0,
+    "totalConnections": 1000,
+    "failedConnections": 0,
+    "testDurationSeconds": 400.002518639,
+    "publicationSuccessRate": 100,
+    "connectionSuccessRate": 100,
+    "throughputMsgsPerSec": 747.4977933072634,
+    "averageRequestsPerMin": 42714.42857142857
+  },
+  "requestsPerMinute": {
+    "1": 17638,
+    "2": 51758,
+    "3": 60000,
+    "4": 60002,
+    "5": 59999,
+    "6": 41763,
+    "7": 7841
+  },
+  "timestamp": "2025-09-20T12:02:03.120809474Z"
+}
