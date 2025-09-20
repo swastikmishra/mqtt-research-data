@@ -1,0 +1,35 @@
+{
+  "testCode": "SINGLE-LOCAL-R1000-Q2",
+  "brokerName": "",
+  "brokerHost": "",
+  "brokerPort": 0,
+  "testConfiguration": {
+    "totalUsers": 1000,
+    "rampUpRate": 1000,
+    "qos": 2,
+    "messageSizeKB": 10,
+    "publishRatePerSec": 1,
+    "testDurationMins": 5
+  },
+  "testMetrics": {
+    "totalMessages": 299000,
+    "successfulPubs": 299000,
+    "failedPubs": 0,
+    "totalConnections": 1000,
+    "failedConnections": 0,
+    "testDurationSeconds": 301.135056673,
+    "publicationSuccessRate": 100,
+    "connectionSuccessRate": 100,
+    "throughputMsgsPerSec": 992.909969710639,
+    "averageRequestsPerMin": 49833.333333333336
+  },
+  "requestsPerMinute": {
+    "1": 58837,
+    "2": 60005,
+    "3": 59997,
+    "4": 60001,
+    "5": 60000,
+    "6": 160
+  },
+  "timestamp": "2025-09-20T12:09:19.319161938Z"
+}
