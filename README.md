@@ -3,117 +3,135 @@
 ## 00 Single
 
 ### Local Device (Broker + Pub-Sub)
-**Test Config:** [tests.json](test-cases/00%20Single/1.%20Local%20Device%20(Broker%20+%20Pub-Sub)/tests.json)
 
-| Code | Category | Users | Ramp up / sec | QoS | Message Size (KB) | Publish Rate (msg/sec/user) | Test Duration (mins) |
-|------|----------|-------|---------------|-----|-------------------|---------------------------|---------------------|
-| LOCAL-HS-A-Q0 | SINGLE | 1000 | 10 | Q0 | 1 | 1 | 10 |
-| LOCAL-HS-A-Q1 | SINGLE | 1000 | 10 | Q1 | 1 | 1 | 10 |
-| LOCAL-HS-A-Q2 | SINGLE | 1000 | 10 | Q2 | 1 | 1 | 10 |
-| LOCAL-HS-B-Q0 | SINGLE | 1000 | 100 | Q0 | 10 | 1 | 10 |
-| LOCAL-HS-B-Q1 | SINGLE | 1000 | 100 | Q1 | 10 | 1 | 10 |
-| LOCAL-HS-B-Q2 | SINGLE | 1000 | 100 | Q2 | 10 | 1 | 10 |
+| Code                  | Users | Ramp up / sec | QoS | Message Size (KB) | Publish Rate (msg/sec/user) | Test Duration (mins) |
+| --------------------- | ----- | ------------- | --- | ----------------- | --------------------------- | -------------------- |
+| SINGLE-LOCAL-R10-Q0   | 1000  | 10            | Q0  | 10                | 1                           | 5                    |
+| SINGLE-LOCAL-R10-Q1   | 1000  | 10            | Q1  | 10                | 1                           | 5                    |
+| SINGLE-LOCAL-R10-Q2   | 1000  | 10            | Q2  | 10                | 1                           | 5                    |
+| SINGLE-LOCAL-R100-Q0  | 1000  | 100           | Q0  | 10                | 1                           | 5                    |
+| SINGLE-LOCAL-R100-Q1  | 1000  | 100           | Q1  | 10                | 1                           | 5                    |
+| SINGLE-LOCAL-R100-Q2  | 1000  | 100           | Q2  | 10                | 1                           | 5                    |
+| SINGLE-LOCAL-R1000-Q0 | 1000  | 1000          | Q0  | 10                | 1                           | 5                    |
+| SINGLE-LOCAL-R1000-Q1 | 1000  | 1000          | Q1  | 10                | 1                           | 5                    |
+| SINGLE-LOCAL-R1000-Q2 | 1000  | 1000          | Q2  | 10                | 1                           | 5                    |
 
 ### AWS (Broker + Pub-Sub)
-**Test Config:** [tests.json](test-cases/00%20Single/2.%20AWS%20(Broker%20+%20Pub-Sub)/tests.json)
 
-| Code | Category | Users | Ramp up / sec | QoS | Message Size (KB) | Publish Rate (msg/sec/user) | Test Duration (mins) |
-|------|----------|-------|---------------|-----|-------------------|---------------------------|---------------------|
-| AWS-HS-A-Q0 | SINGLE | 1000 | 10 | Q0 | 1 | 1 | 10 |
-| AWS-HS-A-Q1 | SINGLE | 1000 | 10 | Q1 | 1 | 1 | 10 |
-| AWS-HS-A-Q2 | SINGLE | 1000 | 10 | Q2 | 1 | 1 | 10 |
-| AWS-HS-B-Q0 | SINGLE | 1000 | 100 | Q0 | 10 | 1 | 10 |
-| AWS-HS-B-Q1 | SINGLE | 1000 | 100 | Q1 | 10 | 1 | 10 |
-| AWS-HS-B-Q2 | SINGLE | 1000 | 100 | Q2 | 10 | 1 | 10 |
+| Code                | Users | Ramp up / sec | QoS | Message Size (KB) | Publish Rate (msg/sec/user) | Test Duration (mins) |
+| ------------------- | ----- | ------------- | --- | ----------------- | --------------------------- | -------------------- |
+| SINGLE-AWS-R10-Q0   | 1000  | 10            | Q0  | 10                | 1                           | 5                    |
+| SINGLE-AWS-R10-Q1   | 1000  | 10            | Q1  | 10                | 1                           | 5                    |
+| SINGLE-AWS-R10-Q2   | 1000  | 10            | Q2  | 10                | 1                           | 5                    |
+| SINGLE-AWS-R100-Q0  | 1000  | 100           | Q0  | 10                | 1                           | 5                    |
+| SINGLE-AWS-R100-Q1  | 1000  | 100           | Q1  | 10                | 1                           | 5                    |
+| SINGLE-AWS-R100-Q2  | 1000  | 100           | Q2  | 10                | 1                           | 5                    |
+| SINGLE-AWS-R1000-Q0 | 1000  | 1000          | Q0  | 10                | 1                           | 5                    |
+| SINGLE-AWS-R1000-Q1 | 1000  | 1000          | Q1  | 10                | 1                           | 5                    |
+| SINGLE-AWS-R1000-Q2 | 1000  | 1000          | Q2  | 10                | 1                           | 5                    |
 
 ### AWS (Broker) + Local (Pub-Sub)
-**Test Config:** [tests.json](test-cases/00%20Single/3.%20AWS%20(Broker)%20+%20Local%20(Pub-Sub)/tests.json)
 
-| Code | Category | Users | Ramp up / sec | QoS | Message Size (KB) | Publish Rate (msg/sec/user) | Test Duration (mins) |
-|------|----------|-------|---------------|-----|-------------------|---------------------------|---------------------|
-| AWS-LC-HS-A-Q0 | SINGLE | 1000 | 10 | Q0 | 1 | 1 | 10 |
-| AWS-LC-HS-A-Q1 | SINGLE | 1000 | 10 | Q1 | 1 | 1 | 10 |
-| AWS-LC-HS-A-Q2 | SINGLE | 1000 | 10 | Q2 | 1 | 1 | 10 |
-| AWS-LC-HS-B-Q0 | SINGLE | 1000 | 100 | Q0 | 10 | 1 | 10 |
-| AWS-LC-HS-B-Q1 | SINGLE | 1000 | 100 | Q1 | 10 | 1 | 10 |
-| AWS-LC-HS-B-Q2 | SINGLE | 1000 | 100 | Q2 | 10 | 1 | 10 |
+| Code                     | Users | Ramp up / sec | QoS | Message Size (KB) | Publish Rate (msg/sec/user) | Test Duration (mins) |
+| ------------------------ | ----- | ------------- | --- | ----------------- | --------------------------- | -------------------- |
+| SINGLE-AWSLOCAL-R10-Q0   | 1000  | 10            | Q0  | 10                | 1                           | 5                    |
+| SINGLE-AWSLOCAL-R10-Q1   | 1000  | 10            | Q1  | 10                | 1                           | 5                    |
+| SINGLE-AWSLOCAL-R10-Q2   | 1000  | 10            | Q2  | 10                | 1                           | 5                    |
+| SINGLE-AWSLOCAL-R100-Q0  | 1000  | 100           | Q0  | 10                | 1                           | 5                    |
+| SINGLE-AWSLOCAL-R100-Q1  | 1000  | 100           | Q1  | 10                | 1                           | 5                    |
+| SINGLE-AWSLOCAL-R100-Q2  | 1000  | 100           | Q2  | 10                | 1                           | 5                    |
+| SINGLE-AWSLOCAL-R1000-Q0 | 1000  | 1000          | Q0  | 10                | 1                           | 5                    |
+| SINGLE-AWSLOCAL-R1000-Q1 | 1000  | 1000          | Q1  | 10                | 1                           | 5                    |
+| SINGLE-AWSLOCAL-R1000-Q2 | 1000  | 1000          | Q2  | 10                | 1                           | 5                    |
 
 ---
 
 ## 01 Horizontal
 
 ### Local Device (Broker + Pub-Sub)
-**Test Config:** [tests.json](test-cases/01%20Horizontal/1.%20Local%20Device%20(Broker%20+%20Pub-Sub)/tests.json)
 
-| Code | Category | Users | Ramp up / sec | QoS | Message Size (KB) | Publish Rate (msg/sec/user) | Test Duration (mins) |
-|------|----------|-------|---------------|-----|-------------------|---------------------------|---------------------|
-| LOCAL-HM-A-Q0 | HORIZONTAL | 1000 | 10 | Q0 | 1 | 1 | 10 |
-| LOCAL-HM-A-Q1 | HORIZONTAL | 1000 | 10 | Q1 | 1 | 1 | 10 |
-| LOCAL-HM-A-Q2 | HORIZONTAL | 1000 | 10 | Q2 | 1 | 1 | 10 |
-| LOCAL-HM-B-Q0 | HORIZONTAL | 1000 | 100 | Q0 | 10 | 1 | 10 |
-| LOCAL-HM-B-Q1 | HORIZONTAL | 1000 | 100 | Q1 | 10 | 1 | 10 |
-| LOCAL-HM-B-Q2 | HORIZONTAL | 1000 | 100 | Q2 | 10 | 1 | 10 |
+| Code                      | Users | Ramp up / sec | QoS | Message Size (KB) | Publish Rate (msg/sec/user) | Test Duration (mins) |
+| ------------------------- | ----- | ------------- | --- | ----------------- | --------------------------- | -------------------- |
+| HORIZONTAL-LOCAL-R10-Q0   | 1000  | 10            | Q0  | 10                | 1                           | 5                    |
+| HORIZONTAL-LOCAL-R10-Q1   | 1000  | 10            | Q1  | 10                | 1                           | 5                    |
+| HORIZONTAL-LOCAL-R10-Q2   | 1000  | 10            | Q2  | 10                | 1                           | 5                    |
+| HORIZONTAL-LOCAL-R100-Q0  | 1000  | 100           | Q0  | 10                | 1                           | 5                    |
+| HORIZONTAL-LOCAL-R100-Q1  | 1000  | 100           | Q1  | 10                | 1                           | 5                    |
+| HORIZONTAL-LOCAL-R100-Q2  | 1000  | 100           | Q2  | 10                | 1                           | 5                    |
+| HORIZONTAL-LOCAL-R1000-Q0 | 1000  | 1000          | Q0  | 10                | 1                           | 5                    |
+| HORIZONTAL-LOCAL-R1000-Q1 | 1000  | 1000          | Q1  | 10                | 1                           | 5                    |
+| HORIZONTAL-LOCAL-R1000-Q2 | 1000  | 1000          | Q2  | 10                | 1                           | 5                    |
 
 ### AWS (Broker + Pub-Sub)
-**Test Config:** [tests.json](test-cases/01%20Horizontal/2.%20AWS%20(Broker%20+%20Pub-Sub)/tests.json)
 
-| Code | Category | Users | Ramp up / sec | QoS | Message Size (KB) | Publish Rate (msg/sec/user) | Test Duration (mins) |
-|------|----------|-------|---------------|-----|-------------------|---------------------------|---------------------|
-| AWS-HM-A-Q0 | HORIZONTAL | 1000 | 10 | Q0 | 1 | 1 | 10 |
-| AWS-HM-A-Q1 | HORIZONTAL | 1000 | 10 | Q1 | 1 | 1 | 10 |
-| AWS-HM-A-Q2 | HORIZONTAL | 1000 | 10 | Q2 | 1 | 1 | 10 |
-| AWS-HM-B-Q0 | HORIZONTAL | 1000 | 100 | Q0 | 10 | 1 | 10 |
-| AWS-HM-B-Q1 | HORIZONTAL | 1000 | 100 | Q1 | 10 | 1 | 10 |
-| AWS-HM-B-Q2 | HORIZONTAL | 1000 | 100 | Q2 | 10 | 1 | 10 |
+| Code                    | Users | Ramp up / sec | QoS | Message Size (KB) | Publish Rate (msg/sec/user) | Test Duration (mins) |
+| ----------------------- | ----- | ------------- | --- | ----------------- | --------------------------- | -------------------- |
+| HORIZONTAL-AWS-R10-Q0   | 1000  | 10            | Q0  | 10                | 1                           | 5                    |
+| HORIZONTAL-AWS-R10-Q1   | 1000  | 10            | Q1  | 10                | 1                           | 5                    |
+| HORIZONTAL-AWS-R10-Q2   | 1000  | 10            | Q2  | 10                | 1                           | 5                    |
+| HORIZONTAL-AWS-R100-Q0  | 1000  | 100           | Q0  | 10                | 1                           | 5                    |
+| HORIZONTAL-AWS-R100-Q1  | 1000  | 100           | Q1  | 10                | 1                           | 5                    |
+| HORIZONTAL-AWS-R100-Q2  | 1000  | 100           | Q2  | 10                | 1                           | 5                    |
+| HORIZONTAL-AWS-R1000-Q0 | 1000  | 1000          | Q0  | 10                | 1                           | 5                    |
+| HORIZONTAL-AWS-R1000-Q1 | 1000  | 1000          | Q1  | 10                | 1                           | 5                    |
+| HORIZONTAL-AWS-R1000-Q2 | 1000  | 1000          | Q2  | 10                | 1                           | 5                    |
 
 ### AWS (Broker) + Local (Pub-Sub)
-**Test Config:** [tests.json](test-cases/01%20Horizontal/3.%20AWS%20(Broker)%20+%20Local%20(Pub-Sub)/tests.json)
 
-| Code | Category | Users | Ramp up / sec | QoS | Message Size (KB) | Publish Rate (msg/sec/user) | Test Duration (mins) |
-|------|----------|-------|---------------|-----|-------------------|---------------------------|---------------------|
-| AWS-LC-HM-A-Q0 | HORIZONTAL | 1000 | 10 | Q0 | 1 | 1 | 10 |
-| AWS-LC-HM-A-Q1 | HORIZONTAL | 1000 | 10 | Q1 | 1 | 1 | 10 |
-| AWS-LC-HM-A-Q2 | HORIZONTAL | 1000 | 10 | Q2 | 1 | 1 | 10 |
-| AWS-LC-HM-B-Q0 | HORIZONTAL | 1000 | 100 | Q0 | 10 | 1 | 10 |
-| AWS-LC-HM-B-Q1 | HORIZONTAL | 1000 | 100 | Q1 | 10 | 1 | 10 |
-| AWS-LC-HM-B-Q2 | HORIZONTAL | 1000 | 100 | Q2 | 10 | 1 | 10 |
+| Code                         | Users | Ramp up / sec | QoS | Message Size (KB) | Publish Rate (msg/sec/user) | Test Duration (mins) |
+| ---------------------------- | ----- | ------------- | --- | ----------------- | --------------------------- | -------------------- |
+| HORIZONTAL-AWSLOCAL-R10-Q0   | 1000  | 10            | Q0  | 10                | 1                           | 5                    |
+| HORIZONTAL-AWSLOCAL-R10-Q1   | 1000  | 10            | Q1  | 10                | 1                           | 5                    |
+| HORIZONTAL-AWSLOCAL-R10-Q2   | 1000  | 10            | Q2  | 10                | 1                           | 5                    |
+| HORIZONTAL-AWSLOCAL-R100-Q0  | 1000  | 100           | Q0  | 10                | 1                           | 5                    |
+| HORIZONTAL-AWSLOCAL-R100-Q1  | 1000  | 100           | Q1  | 10                | 1                           | 5                    |
+| HORIZONTAL-AWSLOCAL-R100-Q2  | 1000  | 100           | Q2  | 10                | 1                           | 5                    |
+| HORIZONTAL-AWSLOCAL-R1000-Q0 | 1000  | 1000          | Q0  | 10                | 1                           | 5                    |
+| HORIZONTAL-AWSLOCAL-R1000-Q1 | 1000  | 1000          | Q1  | 10                | 1                           | 5                    |
+| HORIZONTAL-AWSLOCAL-R1000-Q2 | 1000  | 1000          | Q2  | 10                | 1                           | 5                    |
 
 ---
 
 ## 02 Vertical
 
 ### Local Device (Broker + Pub-Sub)
-**Test Config:** [tests.json](test-cases/02%20Vertical/1.%20Local%20Device%20(Broker%20+%20Pub-Sub)/tests.json)
 
-| Code | Category | Users | Ramp up / sec | QoS | Message Size (KB) | Publish Rate (msg/sec/user) | Test Duration (mins) |
-|------|----------|-------|---------------|-----|-------------------|---------------------------|---------------------|
-| LOCAL-VM-A-Q0 | VERTICAL | 1000 | 10 | Q0 | 1 | 1 | 10 |
-| LOCAL-VM-A-Q1 | VERTICAL | 1000 | 10 | Q1 | 1 | 1 | 10 |
-| LOCAL-VM-A-Q2 | VERTICAL | 1000 | 10 | Q2 | 1 | 1 | 10 |
-| LOCAL-VM-B-Q0 | VERTICAL | 1000 | 100 | Q0 | 10 | 1 | 10 |
-| LOCAL-VM-B-Q1 | VERTICAL | 1000 | 100 | Q1 | 10 | 1 | 10 |
-| LOCAL-VM-B-Q2 | VERTICAL | 1000 | 100 | Q2 | 10 | 1 | 10 |
+| Code                    | Users | Ramp up / sec | QoS | Message Size (KB) | Publish Rate (msg/sec/user) | Test Duration (mins) |
+| ----------------------- | ----- | ------------- | --- | ----------------- | --------------------------- | -------------------- |
+| VERTICAL-LOCAL-R10-Q0   | 1000  | 10            | Q0  | 10                | 1                           | 5                    |
+| VERTICAL-LOCAL-R10-Q1   | 1000  | 10            | Q1  | 10                | 1                           | 5                    |
+| VERTICAL-LOCAL-R10-Q2   | 1000  | 10            | Q2  | 10                | 1                           | 5                    |
+| VERTICAL-LOCAL-R100-Q0  | 1000  | 100           | Q0  | 10                | 1                           | 5                    |
+| VERTICAL-LOCAL-R100-Q1  | 1000  | 100           | Q1  | 10                | 1                           | 5                    |
+| VERTICAL-LOCAL-R100-Q2  | 1000  | 100           | Q2  | 10                | 1                           | 5                    |
+| VERTICAL-LOCAL-R1000-Q0 | 1000  | 1000          | Q0  | 10                | 1                           | 5                    |
+| VERTICAL-LOCAL-R1000-Q1 | 1000  | 1000          | Q1  | 10                | 1                           | 5                    |
+| VERTICAL-LOCAL-R1000-Q2 | 1000  | 1000          | Q2  | 10                | 1                           | 5                    |
 
 ### AWS (Broker + Pub-Sub)
-**Test Config:** [tests.json](test-cases/02%20Vertical/2.%20AWS%20(Broker%20+%20Pub-Sub)/tests.json)
 
-| Code | Category | Users | Ramp up / sec | QoS | Message Size (KB) | Publish Rate (msg/sec/user) | Test Duration (mins) |
-|------|----------|-------|---------------|-----|-------------------|---------------------------|---------------------|
-| AWS-VM-A-Q0 | VERTICAL | 1000 | 10 | Q0 | 1 | 1 | 10 |
-| AWS-VM-A-Q1 | VERTICAL | 1000 | 10 | Q1 | 1 | 1 | 10 |
-| AWS-VM-A-Q2 | VERTICAL | 1000 | 10 | Q2 | 1 | 1 | 10 |
-| AWS-VM-B-Q0 | VERTICAL | 1000 | 100 | Q0 | 10 | 1 | 10 |
-| AWS-VM-B-Q1 | VERTICAL | 1000 | 100 | Q1 | 10 | 1 | 10 |
-| AWS-VM-B-Q2 | VERTICAL | 1000 | 100 | Q2 | 10 | 1 | 10 |
+| Code                  | Users | Ramp up / sec | QoS | Message Size (KB) | Publish Rate (msg/sec/user) | Test Duration (mins) |
+| --------------------- | ----- | ------------- | --- | ----------------- | --------------------------- | -------------------- |
+| VERTICAL-AWS-R10-Q0   | 1000  | 10            | Q0  | 10                | 1                           | 5                    |
+| VERTICAL-AWS-R10-Q1   | 1000  | 10            | Q1  | 10                | 1                           | 5                    |
+| VERTICAL-AWS-R10-Q2   | 1000  | 10            | Q2  | 10                | 1                           | 5                    |
+| VERTICAL-AWS-R100-Q0  | 1000  | 100           | Q0  | 10                | 1                           | 5                    |
+| VERTICAL-AWS-R100-Q1  | 1000  | 100           | Q1  | 10                | 1                           | 5                    |
+| VERTICAL-AWS-R100-Q2  | 1000  | 100           | Q2  | 10                | 1                           | 5                    |
+| VERTICAL-AWS-R1000-Q0 | 1000  | 1000          | Q0  | 10                | 1                           | 5                    |
+| VERTICAL-AWS-R1000-Q1 | 1000  | 1000          | Q1  | 10                | 1                           | 5                    |
+| VERTICAL-AWS-R1000-Q2 | 1000  | 1000          | Q2  | 10                | 1                           | 5                    |
 
 ### AWS (Broker) + Local (Pub-Sub)
-**Test Config:** [tests.json](test-cases/02%20Vertical/3.%20AWS%20(Broker)%20+%20Local%20(Pub-Sub)/tests.json)
 
-| Code | Category | Users | Ramp up / sec | QoS | Message Size (KB) | Publish Rate (msg/sec/user) | Test Duration (mins) |
-|------|----------|-------|---------------|-----|-------------------|---------------------------|---------------------|
-| AWS-LC-VM-A-Q0 | VERTICAL | 1000 | 10 | Q0 | 1 | 1 | 10 |
-| AWS-LC-VM-A-Q1 | VERTICAL | 1000 | 10 | Q1 | 1 | 1 | 10 |
-| AWS-LC-VM-A-Q2 | VERTICAL | 1000 | 10 | Q2 | 1 | 1 | 10 |
-| AWS-LC-VM-B-Q0 | VERTICAL | 1000 | 100 | Q0 | 10 | 1 | 10 |
-| AWS-LC-VM-B-Q1 | VERTICAL | 1000 | 100 | Q1 | 10 | 1 | 10 |
-| AWS-LC-VM-B-Q2 | VERTICAL | 1000 | 100 | Q2 | 10 | 1 | 10 |
+| Code                       | Users | Ramp up / sec | QoS | Message Size (KB) | Publish Rate (msg/sec/user) | Test Duration (mins) |
+| -------------------------- | ----- | ------------- | --- | ----------------- | --------------------------- | -------------------- |
+| VERTICAL-AWSLOCAL-R10-Q0   | 1000  | 10            | Q0  | 10                | 1                           | 5                    |
+| VERTICAL-AWSLOCAL-R10-Q1   | 1000  | 10            | Q1  | 10                | 1                           | 5                    |
+| VERTICAL-AWSLOCAL-R10-Q2   | 1000  | 10            | Q2  | 10                | 1                           | 5                    |
+| VERTICAL-AWSLOCAL-R100-Q0  | 1000  | 100           | Q0  | 10                | 1                           | 5                    |
+| VERTICAL-AWSLOCAL-R100-Q1  | 1000  | 100           | Q1  | 10                | 1                           | 5                    |
+| VERTICAL-AWSLOCAL-R100-Q2  | 1000  | 100           | Q2  | 10                | 1                           | 5                    |
+| VERTICAL-AWSLOCAL-R1000-Q0 | 1000  | 1000          | Q0  | 10                | 1                           | 5                    |
+| VERTICAL-AWSLOCAL-R1000-Q1 | 1000  | 1000          | Q1  | 10                | 1                           | 5                    |
+| VERTICAL-AWSLOCAL-R1000-Q2 | 1000  | 1000          | Q2  | 10                | 1                           | 5                    |
