@@ -4,45 +4,36 @@
 
 ### Local Device (Broker + Pub-Sub)
 
-| Code                  | Users | Ramp up / sec | QoS | Message Size (KB) | Publish Rate (msg/sec/user) | Test Duration (mins) |
-| --------------------- | ----- | ------------- | --- | ----------------- | --------------------------- | -------------------- |
-| SINGLE-LOCAL-R10-Q0   | 1000  | 10            | Q0  | 10                | 1                           | 5                    |
-| SINGLE-LOCAL-R10-Q1   | 1000  | 10            | Q1  | 10                | 1                           | 5                    |
-| SINGLE-LOCAL-R10-Q2   | 1000  | 10            | Q2  | 10                | 1                           | 5                    |
-| SINGLE-LOCAL-R100-Q0  | 1000  | 100           | Q0  | 10                | 1                           | 5                    |
-| SINGLE-LOCAL-R100-Q1  | 1000  | 100           | Q1  | 10                | 1                           | 5                    |
-| SINGLE-LOCAL-R100-Q2  | 1000  | 100           | Q2  | 10                | 1                           | 5                    |
-| SINGLE-LOCAL-R1000-Q0 | 1000  | 1000          | Q0  | 10                | 1                           | 5                    |
-| SINGLE-LOCAL-R1000-Q1 | 1000  | 1000          | Q1  | 10                | 1                           | 5                    |
-| SINGLE-LOCAL-R1000-Q2 | 1000  | 1000          | Q2  | 10                | 1                           | 5                    |
+| Code            | Publishers | Ramp up / sec | QoS | Message Size (KB) | Publish Rate (msg/sec/user) | Test Duration (mins) |
+| --------------- | ---------- | ------------- | --- | ----------------- | --------------------------- | -------------------- |
+| SN-LOCAL-10K-Q0 | 10000      | 1000          | Q0  | 10                | 1                           | 5                    |
+| SN-LOCAL-10K-Q1 | 10000      | 1000          | Q1  | 10                | 1                           | 5                    |
+| SN-LOCAL-10K-Q2 | 10000      | 1000          | Q2  | 10                | 1                           | 5                    |
+| SN-LOCAL-20K-Q0 | 20000      | 1000          | Q0  | 10                | 1                           | 5                    |
+| SN-LOCAL-20K-Q1 | 20000      | 1000          | Q1  | 10                | 1                           | 5                    |
+| SN-LOCAL-20K-Q2 | 20000      | 1000          | Q2  | 10                | 1                           | 5                    |
 
 ### AWS (Broker + Pub-Sub)
 
-| Code                | Users | Ramp up / sec | QoS | Message Size (KB) | Publish Rate (msg/sec/user) | Test Duration (mins) |
-| ------------------- | ----- | ------------- | --- | ----------------- | --------------------------- | -------------------- |
-| SINGLE-AWS-R10-Q0   | 1000  | 10            | Q0  | 10                | 1                           | 5                    |
-| SINGLE-AWS-R10-Q1   | 1000  | 10            | Q1  | 10                | 1                           | 5                    |
-| SINGLE-AWS-R10-Q2   | 1000  | 10            | Q2  | 10                | 1                           | 5                    |
-| SINGLE-AWS-R100-Q0  | 1000  | 100           | Q0  | 10                | 1                           | 5                    |
-| SINGLE-AWS-R100-Q1  | 1000  | 100           | Q1  | 10                | 1                           | 5                    |
-| SINGLE-AWS-R100-Q2  | 1000  | 100           | Q2  | 10                | 1                           | 5                    |
-| SINGLE-AWS-R1000-Q0 | 1000  | 1000          | Q0  | 10                | 1                           | 5                    |
-| SINGLE-AWS-R1000-Q1 | 1000  | 1000          | Q1  | 10                | 1                           | 5                    |
-| SINGLE-AWS-R1000-Q2 | 1000  | 1000          | Q2  | 10                | 1                           | 5                    |
+| Code          | Publishers | Ramp up / sec | QoS | Message Size (KB) | Publish Rate (msg/sec/user) | Test Duration (mins) |
+| ------------- | ---------- | ------------- | --- | ----------------- | --------------------------- | -------------------- |
+| SN-AWS-10K-Q0 | 10000      | 1000          | Q0  | 10                | 1                           | 5                    |
+| SN-AWS-10K-Q1 | 10000      | 1000          | Q1  | 10                | 1                           | 5                    |
+| SN-AWS-10K-Q2 | 10000      | 1000          | Q2  | 10                | 1                           | 5                    |
+| SN-AWS-20K-Q0 | 20000      | 1000          | Q0  | 10                | 1                           | 5                    |
+| SN-AWS-20K-Q1 | 20000      | 1000          | Q1  | 10                | 1                           | 5                    |
+| SN-AWS-20K-Q2 | 20000      | 1000          | Q2  | 10                | 1                           | 5                    |
 
 ### AWS (Broker) + Local (Pub-Sub)
 
-| Code                     | Users | Ramp up / sec | QoS | Message Size (KB) | Publish Rate (msg/sec/user) | Test Duration (mins) |
-| ------------------------ | ----- | ------------- | --- | ----------------- | --------------------------- | -------------------- |
-| SINGLE-AWSLOCAL-R10-Q0   | 1000  | 10            | Q0  | 10                | 1                           | 5                    |
-| SINGLE-AWSLOCAL-R10-Q1   | 1000  | 10            | Q1  | 10                | 1                           | 5                    |
-| SINGLE-AWSLOCAL-R10-Q2   | 1000  | 10            | Q2  | 10                | 1                           | 5                    |
-| SINGLE-AWSLOCAL-R100-Q0  | 1000  | 100           | Q0  | 10                | 1                           | 5                    |
-| SINGLE-AWSLOCAL-R100-Q1  | 1000  | 100           | Q1  | 10                | 1                           | 5                    |
-| SINGLE-AWSLOCAL-R100-Q2  | 1000  | 100           | Q2  | 10                | 1                           | 5                    |
-| SINGLE-AWSLOCAL-R1000-Q0 | 1000  | 1000          | Q0  | 10                | 1                           | 5                    |
-| SINGLE-AWSLOCAL-R1000-Q1 | 1000  | 1000          | Q1  | 10                | 1                           | 5                    |
-| SINGLE-AWSLOCAL-R1000-Q2 | 1000  | 1000          | Q2  | 10                | 1                           | 5                    |
+| Code               | Publishers | Ramp up / sec | QoS | Message Size (KB) | Publish Rate (msg/sec/user) | Test Duration (mins) |
+| ------------------ | ---------- | ------------- | --- | ----------------- | --------------------------- | -------------------- |
+| SN-AWSLOCAL-10K-Q0 | 10000      | 1000          | Q0  | 10                | 1                           | 5                    |
+| SN-AWSLOCAL-10K-Q1 | 10000      | 1000          | Q1  | 10                | 1                           | 5                    |
+| SN-AWSLOCAL-10K-Q2 | 10000      | 1000          | Q2  | 10                | 1                           | 5                    |
+| SN-AWSLOCAL-20K-Q0 | 20000      | 1000          | Q0  | 10                | 1                           | 5                    |
+| SN-AWSLOCAL-20K-Q1 | 20000      | 1000          | Q1  | 10                | 1                           | 5                    |
+| SN-AWSLOCAL-20K-Q2 | 20000      | 1000          | Q2  | 10                | 1                           | 5                    |
 
 ---
 
@@ -50,45 +41,36 @@
 
 ### Local Device (Broker + Pub-Sub)
 
-| Code                      | Users | Ramp up / sec | QoS | Message Size (KB) | Publish Rate (msg/sec/user) | Test Duration (mins) |
-| ------------------------- | ----- | ------------- | --- | ----------------- | --------------------------- | -------------------- |
-| HORIZONTAL-LOCAL-R10-Q0   | 1000  | 10            | Q0  | 10                | 1                           | 5                    |
-| HORIZONTAL-LOCAL-R10-Q1   | 1000  | 10            | Q1  | 10                | 1                           | 5                    |
-| HORIZONTAL-LOCAL-R10-Q2   | 1000  | 10            | Q2  | 10                | 1                           | 5                    |
-| HORIZONTAL-LOCAL-R100-Q0  | 1000  | 100           | Q0  | 10                | 1                           | 5                    |
-| HORIZONTAL-LOCAL-R100-Q1  | 1000  | 100           | Q1  | 10                | 1                           | 5                    |
-| HORIZONTAL-LOCAL-R100-Q2  | 1000  | 100           | Q2  | 10                | 1                           | 5                    |
-| HORIZONTAL-LOCAL-R1000-Q0 | 1000  | 1000          | Q0  | 10                | 1                           | 5                    |
-| HORIZONTAL-LOCAL-R1000-Q1 | 1000  | 1000          | Q1  | 10                | 1                           | 5                    |
-| HORIZONTAL-LOCAL-R1000-Q2 | 1000  | 1000          | Q2  | 10                | 1                           | 5                    |
+| Code            | Publishers | Ramp up / sec | QoS | Message Size (KB) | Publish Rate (msg/sec/user) | Test Duration (mins) |
+| --------------- | ---------- | ------------- | --- | ----------------- | --------------------------- | -------------------- |
+| HZ-LOCAL-10K-Q0 | 10000      | 1000          | Q0  | 10                | 1                           | 5                    |
+| HZ-LOCAL-10K-Q1 | 10000      | 1000          | Q1  | 10                | 1                           | 5                    |
+| HZ-LOCAL-10K-Q2 | 10000      | 1000          | Q2  | 10                | 1                           | 5                    |
+| HZ-LOCAL-20K-Q0 | 20000      | 1000          | Q0  | 10                | 1                           | 5                    |
+| HZ-LOCAL-20K-Q1 | 20000      | 1000          | Q1  | 10                | 1                           | 5                    |
+| HZ-LOCAL-20K-Q2 | 20000      | 1000          | Q2  | 10                | 1                           | 5                    |
 
 ### AWS (Broker + Pub-Sub)
 
-| Code                    | Users | Ramp up / sec | QoS | Message Size (KB) | Publish Rate (msg/sec/user) | Test Duration (mins) |
-| ----------------------- | ----- | ------------- | --- | ----------------- | --------------------------- | -------------------- |
-| HORIZONTAL-AWS-R10-Q0   | 1000  | 10            | Q0  | 10                | 1                           | 5                    |
-| HORIZONTAL-AWS-R10-Q1   | 1000  | 10            | Q1  | 10                | 1                           | 5                    |
-| HORIZONTAL-AWS-R10-Q2   | 1000  | 10            | Q2  | 10                | 1                           | 5                    |
-| HORIZONTAL-AWS-R100-Q0  | 1000  | 100           | Q0  | 10                | 1                           | 5                    |
-| HORIZONTAL-AWS-R100-Q1  | 1000  | 100           | Q1  | 10                | 1                           | 5                    |
-| HORIZONTAL-AWS-R100-Q2  | 1000  | 100           | Q2  | 10                | 1                           | 5                    |
-| HORIZONTAL-AWS-R1000-Q0 | 1000  | 1000          | Q0  | 10                | 1                           | 5                    |
-| HORIZONTAL-AWS-R1000-Q1 | 1000  | 1000          | Q1  | 10                | 1                           | 5                    |
-| HORIZONTAL-AWS-R1000-Q2 | 1000  | 1000          | Q2  | 10                | 1                           | 5                    |
+| Code          | Publishers | Ramp up / sec | QoS | Message Size (KB) | Publish Rate (msg/sec/user) | Test Duration (mins) |
+| ------------- | ---------- | ------------- | --- | ----------------- | --------------------------- | -------------------- |
+| HZ-AWS-10K-Q0 | 10000      | 1000          | Q0  | 10                | 1                           | 5                    |
+| HZ-AWS-10K-Q1 | 10000      | 1000          | Q1  | 10                | 1                           | 5                    |
+| HZ-AWS-10K-Q2 | 10000      | 1000          | Q2  | 10                | 1                           | 5                    |
+| HZ-AWS-20K-Q0 | 20000      | 1000          | Q0  | 10                | 1                           | 5                    |
+| HZ-AWS-20K-Q1 | 20000      | 1000          | Q1  | 10                | 1                           | 5                    |
+| HZ-AWS-20K-Q2 | 20000      | 1000          | Q2  | 10                | 1                           | 5                    |
 
 ### AWS (Broker) + Local (Pub-Sub)
 
-| Code                         | Users | Ramp up / sec | QoS | Message Size (KB) | Publish Rate (msg/sec/user) | Test Duration (mins) |
-| ---------------------------- | ----- | ------------- | --- | ----------------- | --------------------------- | -------------------- |
-| HORIZONTAL-AWSLOCAL-R10-Q0   | 1000  | 10            | Q0  | 10                | 1                           | 5                    |
-| HORIZONTAL-AWSLOCAL-R10-Q1   | 1000  | 10            | Q1  | 10                | 1                           | 5                    |
-| HORIZONTAL-AWSLOCAL-R10-Q2   | 1000  | 10            | Q2  | 10                | 1                           | 5                    |
-| HORIZONTAL-AWSLOCAL-R100-Q0  | 1000  | 100           | Q0  | 10                | 1                           | 5                    |
-| HORIZONTAL-AWSLOCAL-R100-Q1  | 1000  | 100           | Q1  | 10                | 1                           | 5                    |
-| HORIZONTAL-AWSLOCAL-R100-Q2  | 1000  | 100           | Q2  | 10                | 1                           | 5                    |
-| HORIZONTAL-AWSLOCAL-R1000-Q0 | 1000  | 1000          | Q0  | 10                | 1                           | 5                    |
-| HORIZONTAL-AWSLOCAL-R1000-Q1 | 1000  | 1000          | Q1  | 10                | 1                           | 5                    |
-| HORIZONTAL-AWSLOCAL-R1000-Q2 | 1000  | 1000          | Q2  | 10                | 1                           | 5                    |
+| Code               | Publishers | Ramp up / sec | QoS | Message Size (KB) | Publish Rate (msg/sec/user) | Test Duration (mins) |
+| ------------------ | ---------- | ------------- | --- | ----------------- | --------------------------- | -------------------- |
+| HZ-AWSLOCAL-10K-Q0 | 10000      | 1000          | Q0  | 10                | 1                           | 5                    |
+| HZ-AWSLOCAL-10K-Q1 | 10000      | 1000          | Q1  | 10                | 1                           | 5                    |
+| HZ-AWSLOCAL-10K-Q2 | 10000      | 1000          | Q2  | 10                | 1                           | 5                    |
+| HZ-AWSLOCAL-20K-Q0 | 20000      | 1000          | Q0  | 10                | 1                           | 5                    |
+| HZ-AWSLOCAL-20K-Q1 | 20000      | 1000          | Q1  | 10                | 1                           | 5                    |
+| HZ-AWSLOCAL-20K-Q2 | 20000      | 1000          | Q2  | 10                | 1                           | 5                    |
 
 ---
 
@@ -96,45 +78,36 @@
 
 ### Local Device (Broker + Pub-Sub)
 
-| Code                    | Users | Ramp up / sec | QoS | Message Size (KB) | Publish Rate (msg/sec/user) | Test Duration (mins) |
-| ----------------------- | ----- | ------------- | --- | ----------------- | --------------------------- | -------------------- |
-| VERTICAL-LOCAL-R10-Q0   | 1000  | 10            | Q0  | 10                | 1                           | 5                    |
-| VERTICAL-LOCAL-R10-Q1   | 1000  | 10            | Q1  | 10                | 1                           | 5                    |
-| VERTICAL-LOCAL-R10-Q2   | 1000  | 10            | Q2  | 10                | 1                           | 5                    |
-| VERTICAL-LOCAL-R100-Q0  | 1000  | 100           | Q0  | 10                | 1                           | 5                    |
-| VERTICAL-LOCAL-R100-Q1  | 1000  | 100           | Q1  | 10                | 1                           | 5                    |
-| VERTICAL-LOCAL-R100-Q2  | 1000  | 100           | Q2  | 10                | 1                           | 5                    |
-| VERTICAL-LOCAL-R1000-Q0 | 1000  | 1000          | Q0  | 10                | 1                           | 5                    |
-| VERTICAL-LOCAL-R1000-Q1 | 1000  | 1000          | Q1  | 10                | 1                           | 5                    |
-| VERTICAL-LOCAL-R1000-Q2 | 1000  | 1000          | Q2  | 10                | 1                           | 5                    |
+| Code            | Publishers | Ramp up / sec | QoS | Message Size (KB) | Publish Rate (msg/sec/user) | Test Duration (mins) |
+| --------------- | ---------- | ------------- | --- | ----------------- | --------------------------- | -------------------- |
+| VT-LOCAL-10K-Q0 | 10000      | 1000          | Q0  | 10                | 1                           | 5                    |
+| VT-LOCAL-10K-Q1 | 10000      | 1000          | Q1  | 10                | 1                           | 5                    |
+| VT-LOCAL-10K-Q2 | 10000      | 1000          | Q2  | 10                | 1                           | 5                    |
+| VT-LOCAL-20K-Q0 | 20000      | 1000          | Q0  | 10                | 1                           | 5                    |
+| VT-LOCAL-20K-Q1 | 20000      | 1000          | Q1  | 10                | 1                           | 5                    |
+| VT-LOCAL-20K-Q2 | 20000      | 1000          | Q2  | 10                | 1                           | 5                    |
 
 ### AWS (Broker + Pub-Sub)
 
-| Code                  | Users | Ramp up / sec | QoS | Message Size (KB) | Publish Rate (msg/sec/user) | Test Duration (mins) |
-| --------------------- | ----- | ------------- | --- | ----------------- | --------------------------- | -------------------- |
-| VERTICAL-AWS-R10-Q0   | 1000  | 10            | Q0  | 10                | 1                           | 5                    |
-| VERTICAL-AWS-R10-Q1   | 1000  | 10            | Q1  | 10                | 1                           | 5                    |
-| VERTICAL-AWS-R10-Q2   | 1000  | 10            | Q2  | 10                | 1                           | 5                    |
-| VERTICAL-AWS-R100-Q0  | 1000  | 100           | Q0  | 10                | 1                           | 5                    |
-| VERTICAL-AWS-R100-Q1  | 1000  | 100           | Q1  | 10                | 1                           | 5                    |
-| VERTICAL-AWS-R100-Q2  | 1000  | 100           | Q2  | 10                | 1                           | 5                    |
-| VERTICAL-AWS-R1000-Q0 | 1000  | 1000          | Q0  | 10                | 1                           | 5                    |
-| VERTICAL-AWS-R1000-Q1 | 1000  | 1000          | Q1  | 10                | 1                           | 5                    |
-| VERTICAL-AWS-R1000-Q2 | 1000  | 1000          | Q2  | 10                | 1                           | 5                    |
+| Code          | Publishers | Ramp up / sec | QoS | Message Size (KB) | Publish Rate (msg/sec/user) | Test Duration (mins) |
+| ------------- | ---------- | ------------- | --- | ----------------- | --------------------------- | -------------------- |
+| VT-AWS-10K-Q0 | 10000      | 1000          | Q0  | 10                | 1                           | 5                    |
+| VT-AWS-10K-Q1 | 10000      | 1000          | Q1  | 10                | 1                           | 5                    |
+| VT-AWS-10K-Q2 | 10000      | 1000          | Q2  | 10                | 1                           | 5                    |
+| VT-AWS-20K-Q0 | 20000      | 1000          | Q0  | 10                | 1                           | 5                    |
+| VT-AWS-20K-Q1 | 20000      | 1000          | Q1  | 10                | 1                           | 5                    |
+| VT-AWS-20K-Q2 | 20000      | 1000          | Q2  | 10                | 1                           | 5                    |
 
 ### AWS (Broker) + Local (Pub-Sub)
 
-| Code                       | Users | Ramp up / sec | QoS | Message Size (KB) | Publish Rate (msg/sec/user) | Test Duration (mins) |
-| -------------------------- | ----- | ------------- | --- | ----------------- | --------------------------- | -------------------- |
-| VERTICAL-AWSLOCAL-R10-Q0   | 1000  | 10            | Q0  | 10                | 1                           | 5                    |
-| VERTICAL-AWSLOCAL-R10-Q1   | 1000  | 10            | Q1  | 10                | 1                           | 5                    |
-| VERTICAL-AWSLOCAL-R10-Q2   | 1000  | 10            | Q2  | 10                | 1                           | 5                    |
-| VERTICAL-AWSLOCAL-R100-Q0  | 1000  | 100           | Q0  | 10                | 1                           | 5                    |
-| VERTICAL-AWSLOCAL-R100-Q1  | 1000  | 100           | Q1  | 10                | 1                           | 5                    |
-| VERTICAL-AWSLOCAL-R100-Q2  | 1000  | 100           | Q2  | 10                | 1                           | 5                    |
-| VERTICAL-AWSLOCAL-R1000-Q0 | 1000  | 1000          | Q0  | 10                | 1                           | 5                    |
-| VERTICAL-AWSLOCAL-R1000-Q1 | 1000  | 1000          | Q1  | 10                | 1                           | 5                    |
-| VERTICAL-AWSLOCAL-R1000-Q2 | 1000  | 1000          | Q2  | 10                | 1                           | 5                    |
+| Code               | Publishers | Ramp up / sec | QoS | Message Size (KB) | Publish Rate (msg/sec/user) | Test Duration (mins) |
+| ------------------ | ---------- | ------------- | --- | ----------------- | --------------------------- | -------------------- |
+| VT-AWSLOCAL-10K-Q0 | 10000      | 1000          | Q0  | 10                | 1                           | 5                    |
+| VT-AWSLOCAL-10K-Q1 | 10000      | 1000          | Q1  | 10                | 1                           | 5                    |
+| VT-AWSLOCAL-10K-Q2 | 10000      | 1000          | Q2  | 10                | 1                           | 5                    |
+| VT-AWSLOCAL-20K-Q0 | 20000      | 1000          | Q0  | 10                | 1                           | 5                    |
+| VT-AWSLOCAL-20K-Q1 | 20000      | 1000          | Q1  | 10                | 1                           | 5                    |
+| VT-AWSLOCAL-20K-Q2 | 20000      | 1000          | Q2  | 10                | 1                           | 5                    |
 
 ## How to run the tests
 
@@ -168,312 +141,218 @@
 
 # Test commands for each use cases
 
-## 00 Single
+## Single (SN) Tests
 
-### Local Device (Broker + Pub-Sub)
-
+### Local Device Tests
 ```bash
-# SINGLE-LOCAL-R10-Q0
-testCode=SINGLE-LOCAL-R10-Q0 totalUsers=1000 rampUpRate=10 qos=0 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# SN-LOCAL-10K-Q0
+testCode=SN-LOCAL-10K-Q0 totalUsers=10000 rampUpRate=1000 qos=0 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 
-# SINGLE-LOCAL-R10-Q1
-testCode=SINGLE-LOCAL-R10-Q1 totalUsers=1000 rampUpRate=10 qos=1 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# SN-LOCAL-10K-Q1
+testCode=SN-LOCAL-10K-Q1 totalUsers=10000 rampUpRate=1000 qos=1 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 
-# SINGLE-LOCAL-R10-Q2
-testCode=SINGLE-LOCAL-R10-Q2 totalUsers=1000 rampUpRate=10 qos=2 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# SN-LOCAL-10K-Q2
+testCode=SN-LOCAL-10K-Q2 totalUsers=10000 rampUpRate=1000 qos=2 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 
-# SINGLE-LOCAL-R100-Q0
-testCode=SINGLE-LOCAL-R100-Q0 totalUsers=1000 rampUpRate=100 qos=0 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# SN-LOCAL-20K-Q0
+testCode=SN-LOCAL-20K-Q0 totalUsers=20000 rampUpRate=1000 qos=0 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 
-# SINGLE-LOCAL-R100-Q1
-testCode=SINGLE-LOCAL-R100-Q1 totalUsers=1000 rampUpRate=100 qos=1 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# SN-LOCAL-20K-Q1
+testCode=SN-LOCAL-20K-Q1 totalUsers=20000 rampUpRate=1000 qos=1 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 
-# SINGLE-LOCAL-R100-Q2
-testCode=SINGLE-LOCAL-R100-Q2 totalUsers=1000 rampUpRate=100 qos=2 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
-
-# SINGLE-LOCAL-R1000-Q0
-testCode=SINGLE-LOCAL-R1000-Q0 totalUsers=1000 rampUpRate=1000 qos=0 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
-
-# SINGLE-LOCAL-R1000-Q1
-testCode=SINGLE-LOCAL-R1000-Q1 totalUsers=1000 rampUpRate=1000 qos=1 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
-
-# SINGLE-LOCAL-R1000-Q2
-testCode=SINGLE-LOCAL-R1000-Q2 totalUsers=1000 rampUpRate=1000 qos=2 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# SN-LOCAL-20K-Q2
+testCode=SN-LOCAL-20K-Q2 totalUsers=20000 rampUpRate=1000 qos=2 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 ```
 
-### AWS (Broker + Pub-Sub)
-
+### AWS Tests
 ```bash
-# SINGLE-AWS-R10-Q0
-testCode=SINGLE-AWS-R10-Q0 totalUsers=1000 rampUpRate=10 qos=0 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# SN-AWS-10K-Q0
+testCode=SN-AWS-10K-Q0 totalUsers=10000 rampUpRate=1000 qos=0 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 
-# SINGLE-AWS-R10-Q1
-testCode=SINGLE-AWS-R10-Q1 totalUsers=1000 rampUpRate=10 qos=1 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# SN-AWS-10K-Q1
+testCode=SN-AWS-10K-Q1 totalUsers=10000 rampUpRate=1000 qos=1 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 
-# SINGLE-AWS-R10-Q2
-testCode=SINGLE-AWS-R10-Q2 totalUsers=1000 rampUpRate=10 qos=2 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# SN-AWS-10K-Q2
+testCode=SN-AWS-10K-Q2 totalUsers=10000 rampUpRate=1000 qos=2 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 
-# SINGLE-AWS-R100-Q0
-testCode=SINGLE-AWS-R100-Q0 totalUsers=1000 rampUpRate=100 qos=0 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# SN-AWS-20K-Q0
+testCode=SN-AWS-20K-Q0 totalUsers=20000 rampUpRate=1000 qos=0 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 
-# SINGLE-AWS-R100-Q1
-testCode=SINGLE-AWS-R100-Q1 totalUsers=1000 rampUpRate=100 qos=1 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# SN-AWS-20K-Q1
+testCode=SN-AWS-20K-Q1 totalUsers=20000 rampUpRate=1000 qos=1 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 
-# SINGLE-AWS-R100-Q2
-testCode=SINGLE-AWS-R100-Q2 totalUsers=1000 rampUpRate=100 qos=2 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
-
-# SINGLE-AWS-R1000-Q0
-testCode=SINGLE-AWS-R1000-Q0 totalUsers=1000 rampUpRate=1000 qos=0 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
-
-# SINGLE-AWS-R1000-Q1
-testCode=SINGLE-AWS-R1000-Q1 totalUsers=1000 rampUpRate=1000 qos=1 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
-
-# SINGLE-AWS-R1000-Q2
-testCode=SINGLE-AWS-R1000-Q2 totalUsers=1000 rampUpRate=1000 qos=2 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# SN-AWS-20K-Q2
+testCode=SN-AWS-20K-Q2 totalUsers=20000 rampUpRate=1000 qos=2 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 ```
 
-### AWS (Broker) + Local (Pub-Sub)
-
+### AWS-Local Tests
 ```bash
-# SINGLE-AWSLOCAL-R10-Q0
-testCode=SINGLE-AWSLOCAL-R10-Q0 totalUsers=1000 rampUpRate=10 qos=0 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# SN-AWSLOCAL-10K-Q0
+testCode=SN-AWSLOCAL-10K-Q0 totalUsers=10000 rampUpRate=1000 qos=0 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 
-# SINGLE-AWSLOCAL-R10-Q1
-testCode=SINGLE-AWSLOCAL-R10-Q1 totalUsers=1000 rampUpRate=10 qos=1 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# SN-AWSLOCAL-10K-Q1
+testCode=SN-AWSLOCAL-10K-Q1 totalUsers=10000 rampUpRate=1000 qos=1 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 
-# SINGLE-AWSLOCAL-R10-Q2
-testCode=SINGLE-AWSLOCAL-R10-Q2 totalUsers=1000 rampUpRate=10 qos=2 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# SN-AWSLOCAL-10K-Q2
+testCode=SN-AWSLOCAL-10K-Q2 totalUsers=10000 rampUpRate=1000 qos=2 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 
-# SINGLE-AWSLOCAL-R100-Q0
-testCode=SINGLE-AWSLOCAL-R100-Q0 totalUsers=1000 rampUpRate=100 qos=0 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# SN-AWSLOCAL-20K-Q0
+testCode=SN-AWSLOCAL-20K-Q0 totalUsers=20000 rampUpRate=1000 qos=0 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 
-# SINGLE-AWSLOCAL-R100-Q1
-testCode=SINGLE-AWSLOCAL-R100-Q1 totalUsers=1000 rampUpRate=100 qos=1 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# SN-AWSLOCAL-20K-Q1
+testCode=SN-AWSLOCAL-20K-Q1 totalUsers=20000 rampUpRate=1000 qos=1 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 
-# SINGLE-AWSLOCAL-R100-Q2
-testCode=SINGLE-AWSLOCAL-R100-Q2 totalUsers=1000 rampUpRate=100 qos=2 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
-
-# SINGLE-AWSLOCAL-R1000-Q0
-testCode=SINGLE-AWSLOCAL-R1000-Q0 totalUsers=1000 rampUpRate=1000 qos=0 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
-
-# SINGLE-AWSLOCAL-R1000-Q1
-testCode=SINGLE-AWSLOCAL-R1000-Q1 totalUsers=1000 rampUpRate=1000 qos=1 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
-
-# SINGLE-AWSLOCAL-R1000-Q2
-testCode=SINGLE-AWSLOCAL-R1000-Q2 totalUsers=1000 rampUpRate=1000 qos=2 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# SN-AWSLOCAL-20K-Q2
+testCode=SN-AWSLOCAL-20K-Q2 totalUsers=20000 rampUpRate=1000 qos=2 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 ```
 
----
+## Horizontal (HZ) Tests
 
-## 01 Horizontal
-
-### Local Device (Broker + Pub-Sub)
-
+### Local Device Tests
 ```bash
-# HORIZONTAL-LOCAL-R10-Q0
-testCode=HORIZONTAL-LOCAL-R10-Q0 totalUsers=1000 rampUpRate=10 qos=0 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# HZ-LOCAL-10K-Q0
+testCode=HZ-LOCAL-10K-Q0 totalUsers=10000 rampUpRate=1000 qos=0 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 
-# HORIZONTAL-LOCAL-R10-Q1
-testCode=HORIZONTAL-LOCAL-R10-Q1 totalUsers=1000 rampUpRate=10 qos=1 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# HZ-LOCAL-10K-Q1
+testCode=HZ-LOCAL-10K-Q1 totalUsers=10000 rampUpRate=1000 qos=1 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 
-# HORIZONTAL-LOCAL-R10-Q2
-testCode=HORIZONTAL-LOCAL-R10-Q2 totalUsers=1000 rampUpRate=10 qos=2 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# HZ-LOCAL-10K-Q2
+testCode=HZ-LOCAL-10K-Q2 totalUsers=10000 rampUpRate=1000 qos=2 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 
-# HORIZONTAL-LOCAL-R100-Q0
-testCode=HORIZONTAL-LOCAL-R100-Q0 totalUsers=1000 rampUpRate=100 qos=0 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# HZ-LOCAL-20K-Q0
+testCode=HZ-LOCAL-20K-Q0 totalUsers=20000 rampUpRate=1000 qos=0 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 
-# HORIZONTAL-LOCAL-R100-Q1
-testCode=HORIZONTAL-LOCAL-R100-Q1 totalUsers=1000 rampUpRate=100 qos=1 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# HZ-LOCAL-20K-Q1
+testCode=HZ-LOCAL-20K-Q1 totalUsers=20000 rampUpRate=1000 qos=1 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 
-# HORIZONTAL-LOCAL-R100-Q2
-testCode=HORIZONTAL-LOCAL-R100-Q2 totalUsers=1000 rampUpRate=100 qos=2 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
-
-# HORIZONTAL-LOCAL-R1000-Q0
-testCode=HORIZONTAL-LOCAL-R1000-Q0 totalUsers=1000 rampUpRate=1000 qos=0 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
-
-# HORIZONTAL-LOCAL-R1000-Q1
-testCode=HORIZONTAL-LOCAL-R1000-Q1 totalUsers=1000 rampUpRate=1000 qos=1 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
-
-# HORIZONTAL-LOCAL-R1000-Q2
-testCode=HORIZONTAL-LOCAL-R1000-Q2 totalUsers=1000 rampUpRate=1000 qos=2 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# HZ-LOCAL-20K-Q2
+testCode=HZ-LOCAL-20K-Q2 totalUsers=20000 rampUpRate=1000 qos=2 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 ```
 
-### AWS (Broker + Pub-Sub)
-
+### AWS Tests
 ```bash
-# HORIZONTAL-AWS-R10-Q0
-testCode=HORIZONTAL-AWS-R10-Q0 totalUsers=1000 rampUpRate=10 qos=0 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# HZ-AWS-10K-Q0
+testCode=HZ-AWS-10K-Q0 totalUsers=10000 rampUpRate=1000 qos=0 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 
-# HORIZONTAL-AWS-R10-Q1
-testCode=HORIZONTAL-AWS-R10-Q1 totalUsers=1000 rampUpRate=10 qos=1 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# HZ-AWS-10K-Q1
+testCode=HZ-AWS-10K-Q1 totalUsers=10000 rampUpRate=1000 qos=1 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 
-# HORIZONTAL-AWS-R10-Q2
-testCode=HORIZONTAL-AWS-R10-Q2 totalUsers=1000 rampUpRate=10 qos=2 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# HZ-AWS-10K-Q2
+testCode=HZ-AWS-10K-Q2 totalUsers=10000 rampUpRate=1000 qos=2 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 
-# HORIZONTAL-AWS-R100-Q0
-testCode=HORIZONTAL-AWS-R100-Q0 totalUsers=1000 rampUpRate=100 qos=0 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# HZ-AWS-20K-Q0
+testCode=HZ-AWS-20K-Q0 totalUsers=20000 rampUpRate=1000 qos=0 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 
-# HORIZONTAL-AWS-R100-Q1
-testCode=HORIZONTAL-AWS-R100-Q1 totalUsers=1000 rampUpRate=100 qos=1 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# HZ-AWS-20K-Q1
+testCode=HZ-AWS-20K-Q1 totalUsers=20000 rampUpRate=1000 qos=1 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 
-# HORIZONTAL-AWS-R100-Q2
-testCode=HORIZONTAL-AWS-R100-Q2 totalUsers=1000 rampUpRate=100 qos=2 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
-
-# HORIZONTAL-AWS-R1000-Q0
-testCode=HORIZONTAL-AWS-R1000-Q0 totalUsers=1000 rampUpRate=1000 qos=0 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
-
-# HORIZONTAL-AWS-R1000-Q1
-testCode=HORIZONTAL-AWS-R1000-Q1 totalUsers=1000 rampUpRate=1000 qos=1 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
-
-# HORIZONTAL-AWS-R1000-Q2
-testCode=HORIZONTAL-AWS-R1000-Q2 totalUsers=1000 rampUpRate=1000 qos=2 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# HZ-AWS-20K-Q2
+testCode=HZ-AWS-20K-Q2 totalUsers=20000 rampUpRate=1000 qos=2 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 ```
 
-### AWS (Broker) + Local (Pub-Sub)
-
+### AWS-Local Tests
 ```bash
-# HORIZONTAL-AWSLOCAL-R10-Q0
-testCode=HORIZONTAL-AWSLOCAL-R10-Q0 totalUsers=1000 rampUpRate=10 qos=0 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# HZ-AWSLOCAL-10K-Q0
+testCode=HZ-AWSLOCAL-10K-Q0 totalUsers=10000 rampUpRate=1000 qos=0 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 
-# HORIZONTAL-AWSLOCAL-R10-Q1
-testCode=HORIZONTAL-AWSLOCAL-R10-Q1 totalUsers=1000 rampUpRate=10 qos=1 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# HZ-AWSLOCAL-10K-Q1
+testCode=HZ-AWSLOCAL-10K-Q1 totalUsers=10000 rampUpRate=1000 qos=1 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 
-# HORIZONTAL-AWSLOCAL-R10-Q2
-testCode=HORIZONTAL-AWSLOCAL-R10-Q2 totalUsers=1000 rampUpRate=10 qos=2 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# HZ-AWSLOCAL-10K-Q2
+testCode=HZ-AWSLOCAL-10K-Q2 totalUsers=10000 rampUpRate=1000 qos=2 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 
-# HORIZONTAL-AWSLOCAL-R100-Q0
-testCode=HORIZONTAL-AWSLOCAL-R100-Q0 totalUsers=1000 rampUpRate=100 qos=0 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# HZ-AWSLOCAL-20K-Q0
+testCode=HZ-AWSLOCAL-20K-Q0 totalUsers=20000 rampUpRate=1000 qos=0 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 
-# HORIZONTAL-AWSLOCAL-R100-Q1
-testCode=HORIZONTAL-AWSLOCAL-R100-Q1 totalUsers=1000 rampUpRate=100 qos=1 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# HZ-AWSLOCAL-20K-Q1
+testCode=HZ-AWSLOCAL-20K-Q1 totalUsers=20000 rampUpRate=1000 qos=1 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 
-# HORIZONTAL-AWSLOCAL-R100-Q2
-testCode=HORIZONTAL-AWSLOCAL-R100-Q2 totalUsers=1000 rampUpRate=100 qos=2 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
-
-# HORIZONTAL-AWSLOCAL-R1000-Q0
-testCode=HORIZONTAL-AWSLOCAL-R1000-Q0 totalUsers=1000 rampUpRate=1000 qos=0 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
-
-# HORIZONTAL-AWSLOCAL-R1000-Q1
-testCode=HORIZONTAL-AWSLOCAL-R1000-Q1 totalUsers=1000 rampUpRate=1000 qos=1 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
-
-# HORIZONTAL-AWSLOCAL-R1000-Q2
-testCode=HORIZONTAL-AWSLOCAL-R1000-Q2 totalUsers=1000 rampUpRate=1000 qos=2 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# HZ-AWSLOCAL-20K-Q2
+testCode=HZ-AWSLOCAL-20K-Q2 totalUsers=20000 rampUpRate=1000 qos=2 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 ```
 
----
+## Vertical (VT) Tests
 
-## 02 Vertical
-
-### Local Device (Broker + Pub-Sub)
-
+### Local Device Tests
 ```bash
-# VERTICAL-LOCAL-R10-Q0
-testCode=VERTICAL-LOCAL-R10-Q0 totalUsers=1000 rampUpRate=10 qos=0 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# VT-LOCAL-10K-Q0
+testCode=VT-LOCAL-10K-Q0 totalUsers=10000 rampUpRate=1000 qos=0 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 
-# VERTICAL-LOCAL-R10-Q1
-testCode=VERTICAL-LOCAL-R10-Q1 totalUsers=1000 rampUpRate=10 qos=1 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# VT-LOCAL-10K-Q1
+testCode=VT-LOCAL-10K-Q1 totalUsers=10000 rampUpRate=1000 qos=1 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 
-# VERTICAL-LOCAL-R10-Q2
-testCode=VERTICAL-LOCAL-R10-Q2 totalUsers=1000 rampUpRate=10 qos=2 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# VT-LOCAL-10K-Q2
+testCode=VT-LOCAL-10K-Q2 totalUsers=10000 rampUpRate=1000 qos=2 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 
-# VERTICAL-LOCAL-R100-Q0
-testCode=VERTICAL-LOCAL-R100-Q0 totalUsers=1000 rampUpRate=100 qos=0 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# VT-LOCAL-20K-Q0
+testCode=VT-LOCAL-20K-Q0 totalUsers=20000 rampUpRate=1000 qos=0 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 
-# VERTICAL-LOCAL-R100-Q1
-testCode=VERTICAL-LOCAL-R100-Q1 totalUsers=1000 rampUpRate=100 qos=1 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# VT-LOCAL-20K-Q1
+testCode=VT-LOCAL-20K-Q1 totalUsers=20000 rampUpRate=1000 qos=1 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 
-# VERTICAL-LOCAL-R100-Q2
-testCode=VERTICAL-LOCAL-R100-Q2 totalUsers=1000 rampUpRate=100 qos=2 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
-
-# VERTICAL-LOCAL-R1000-Q0
-testCode=VERTICAL-LOCAL-R1000-Q0 totalUsers=1000 rampUpRate=1000 qos=0 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
-
-# VERTICAL-LOCAL-R1000-Q1
-testCode=VERTICAL-LOCAL-R1000-Q1 totalUsers=1000 rampUpRate=1000 qos=1 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
-
-# VERTICAL-LOCAL-R1000-Q2
-testCode=VERTICAL-LOCAL-R1000-Q2 totalUsers=1000 rampUpRate=1000 qos=2 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# VT-LOCAL-20K-Q2
+testCode=VT-LOCAL-20K-Q2 totalUsers=20000 rampUpRate=1000 qos=2 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 ```
 
-### AWS (Broker + Pub-Sub)
-
+### AWS Tests
 ```bash
-# VERTICAL-AWS-R10-Q0
-testCode=VERTICAL-AWS-R10-Q0 totalUsers=1000 rampUpRate=10 qos=0 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# VT-AWS-10K-Q0
+testCode=VT-AWS-10K-Q0 totalUsers=10000 rampUpRate=1000 qos=0 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 
-# VERTICAL-AWS-R10-Q1
-testCode=VERTICAL-AWS-R10-Q1 totalUsers=1000 rampUpRate=10 qos=1 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# VT-AWS-10K-Q1
+testCode=VT-AWS-10K-Q1 totalUsers=10000 rampUpRate=1000 qos=1 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 
-# VERTICAL-AWS-R10-Q2
-testCode=VERTICAL-AWS-R10-Q2 totalUsers=1000 rampUpRate=10 qos=2 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# VT-AWS-10K-Q2
+testCode=VT-AWS-10K-Q2 totalUsers=10000 rampUpRate=1000 qos=2 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 
-# VERTICAL-AWS-R100-Q0
-testCode=VERTICAL-AWS-R100-Q0 totalUsers=1000 rampUpRate=100 qos=0 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# VT-AWS-20K-Q0
+testCode=VT-AWS-20K-Q0 totalUsers=20000 rampUpRate=1000 qos=0 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 
-# VERTICAL-AWS-R100-Q1
-testCode=VERTICAL-AWS-R100-Q1 totalUsers=1000 rampUpRate=100 qos=1 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# VT-AWS-20K-Q1
+testCode=VT-AWS-20K-Q1 totalUsers=20000 rampUpRate=1000 qos=1 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 
-# VERTICAL-AWS-R100-Q2
-testCode=VERTICAL-AWS-R100-Q2 totalUsers=1000 rampUpRate=100 qos=2 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
-
-# VERTICAL-AWS-R1000-Q0
-testCode=VERTICAL-AWS-R1000-Q0 totalUsers=1000 rampUpRate=1000 qos=0 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
-
-# VERTICAL-AWS-R1000-Q1
-testCode=VERTICAL-AWS-R1000-Q1 totalUsers=1000 rampUpRate=1000 qos=1 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
-
-# VERTICAL-AWS-R1000-Q2
-testCode=VERTICAL-AWS-R1000-Q2 totalUsers=1000 rampUpRate=1000 qos=2 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# VT-AWS-20K-Q2
+testCode=VT-AWS-20K-Q2 totalUsers=20000 rampUpRate=1000 qos=2 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 ```
 
-### AWS (Broker) + Local (Pub-Sub)
-
+### AWS-Local Tests
 ```bash
-# VERTICAL-AWSLOCAL-R10-Q0
-testCode=VERTICAL-AWSLOCAL-R10-Q0 totalUsers=1000 rampUpRate=10 qos=0 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# VT-AWSLOCAL-10K-Q0
+testCode=VT-AWSLOCAL-10K-Q0 totalUsers=10000 rampUpRate=1000 qos=0 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 
-# VERTICAL-AWSLOCAL-R10-Q1
-testCode=VERTICAL-AWSLOCAL-R10-Q1 totalUsers=1000 rampUpRate=10 qos=1 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# VT-AWSLOCAL-10K-Q1
+testCode=VT-AWSLOCAL-10K-Q1 totalUsers=10000 rampUpRate=1000 qos=1 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 
-# VERTICAL-AWSLOCAL-R10-Q2
-testCode=VERTICAL-AWSLOCAL-R10-Q2 totalUsers=1000 rampUpRate=10 qos=2 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# VT-AWSLOCAL-10K-Q2
+testCode=VT-AWSLOCAL-10K-Q2 totalUsers=10000 rampUpRate=1000 qos=2 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 
-# VERTICAL-AWSLOCAL-R100-Q0
-testCode=VERTICAL-AWSLOCAL-R100-Q0 totalUsers=1000 rampUpRate=100 qos=0 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# VT-AWSLOCAL-20K-Q0
+testCode=VT-AWSLOCAL-20K-Q0 totalUsers=20000 rampUpRate=1000 qos=0 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 
-# VERTICAL-AWSLOCAL-R100-Q1
-testCode=VERTICAL-AWSLOCAL-R100-Q1 totalUsers=1000 rampUpRate=100 qos=1 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# VT-AWSLOCAL-20K-Q1
+testCode=VT-AWSLOCAL-20K-Q1 totalUsers=20000 rampUpRate=1000 qos=1 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 
-# VERTICAL-AWSLOCAL-R100-Q2
-testCode=VERTICAL-AWSLOCAL-R100-Q2 totalUsers=1000 rampUpRate=100 qos=2 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
-
-# VERTICAL-AWSLOCAL-R1000-Q0
-testCode=VERTICAL-AWSLOCAL-R1000-Q0 totalUsers=1000 rampUpRate=1000 qos=0 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
-
-# VERTICAL-AWSLOCAL-R1000-Q1
-testCode=VERTICAL-AWSLOCAL-R1000-Q1 totalUsers=1000 rampUpRate=1000 qos=1 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
-
-# VERTICAL-AWSLOCAL-R1000-Q2
-testCode=VERTICAL-AWSLOCAL-R1000-Q2 totalUsers=1000 rampUpRate=1000 qos=2 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
+# VT-AWSLOCAL-20K-Q2
+testCode=VT-AWSLOCAL-20K-Q2 totalUsers=20000 rampUpRate=1000 qos=2 messageSizeKB=10 publishRatePerSec=1 testDurationMins=5 ./main
 ```
 
 ---
 
 ## Summary
 
-Total test commands generated: **81**
+Total test commands generated: **54**
 
--   **Single tests**: 27 commands (9 Local + 9 AWS + 9 AWS-Local)
--   **Horizontal tests**: 27 commands (9 Local + 9 AWS + 9 AWS-Local)
--   **Vertical tests**: 27 commands (9 Local + 9 AWS + 9 AWS-Local)
+-   **Single tests**: 18 commands (6 Local + 6 AWS + 6 AWS-Local)
+-   **Horizontal tests**: 18 commands (6 Local + 6 AWS + 6 AWS-Local)
+-   **Vertical tests**: 18 commands (6 Local + 6 AWS + 6 AWS-Local)
 
-Each category tests 3 different ramp-up rates (10, 100, 1000) with 3 different QoS levels (0, 1, 2).
+Each category tests 2 different user counts (10K and 20K users) with 3 different QoS levels (0, 1, 2).
 
 ### Command Format Parameters:
 
 -   `testCode`: Unique identifier for each test case
--   `totalUsers`: Number of total users (1000 for all tests)
--   `rampUpRate`: Users added per second (10, 100, or 1000)
+-   `totalUsers`: Number of total users (10000 or 20000 for all tests)
+-   `rampUpRate`: Users added per second (1000 for all tests)
 -   `qos`: Quality of Service level (0, 1, or 2)
 -   `messageSizeKB`: Message size in KB (10 for all tests)
 -   `publishRatePerSec`: Messages published per second per user (1 for all tests)
