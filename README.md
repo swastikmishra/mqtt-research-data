@@ -66,7 +66,7 @@ docker compose build
 Example:
 
 ``` bash
-./test.sh 13.201.32.55 1883 10 single-broker-baseline-10kb
+./test.sh 13.201.32.55 1883 10 single-10kb
 ```
 
 All clients will connect directly to the specified broker.
