@@ -75,13 +75,20 @@ All clients will connect directly to the specified broker.
 
 
 ``` bash
-./test.sh <brokers_json_file> <payload_kb> <test_name>
+./test.sh <brokers_json_file> <payload_kb> <test_name> <duration_secs>
 ```
 
-Example:
+Example (5 mins default):
 
 ``` bash
 ./test-clustered.sh brokers.json 10 cluster-10kb
+```
+
+
+Example (10 mins):
+
+``` bash
+./test-clustered.sh brokers.json 10 cluster-10kb 600
 ```
 
 
