@@ -132,23 +132,11 @@ Example:
 | ID  | Type    | Subs Count | Pubs Count | Payload (KB) | Duration (Seconds) | Test Name |
 | --- | ------- | ---------- | ---------- | ------------ | ------------------ | --------- |
 | 1   | single  | 100        | 10         | 100          | 180                | single1   |
-| 2   | single  | 100        | 10         | 100          | 180                | single2   |
-| 3   | single  | 100        | 10         | 100          | 180                | single3   |
-| 4   | single  | 250        | 25         | 100          | 180                | single4   |
-| 5   | single  | 250        | 25         | 100          | 180                | single5   |
-| 6   | single  | 250        | 25         | 100          | 180                | single6   |
-| 7   | single  | 500        | 50         | 100          | 180                | single7   |
-| 8   | single  | 500        | 50         | 100          | 180                | single8   |
-| 9   | single  | 500        | 50         | 100          | 180                | single9   |
-| 1   | cluster | 500        | 10         | 100          | 180                | cluster1  |
-| 2   | cluster | 500        | 10         | 100          | 180                | cluster2  |
-| 3   | cluster | 500        | 10         | 100          | 180                | cluster3  |
-| 4   | cluster | 1000       | 25         | 100          | 180                | cluster4  |
-| 5   | cluster | 1000       | 25         | 100          | 180                | cluster5  |
-| 6   | cluster | 1000       | 25         | 100          | 180                | cluster6  |
-| 7   | cluster | 2000       | 50         | 100          | 180                | cluster7  |
-| 8   | cluster | 2000       | 50         | 100          | 180                | cluster8  |
-| 9   | cluster | 2000       | 50         | 100          | 180                | cluster9  |
+| 2   | single  | 300        | 20         | 100          | 180                | single2   |
+| 3   | single  | 600        | 30         | 100          | 180                | single3   |
+| 4   | cluster | 100        | 10         | 100          | 180                | cluster1  |
+| 5   | cluster | 300        | 20         | 100          | 180                | cluster2  |
+| 6   | cluster | 600        | 30         | 100          | 180                | cluster3  |
 
 ### Test Commands:
 
@@ -174,7 +162,7 @@ single2
 go run main.go \
   --broker-host=43.205.176.30 --broker-port=1883 \
   --out-dir=./results --test-name=single2 \
-  --fixed-subs=100 --fixed-pubs=10 \
+  --fixed-subs=300 --fixed-pubs=20 \
   --payload-kb=100 --pub-rate=1 \
   --topic-count=10 \
   --max-duration-sec=180 --warmup-sec=10 \
@@ -190,103 +178,7 @@ single3
 go run main.go \
   --broker-host=43.205.176.30 --broker-port=1883 \
   --out-dir=./results --test-name=single3 \
-  --fixed-subs=100 --fixed-pubs=10 \
-  --payload-kb=100 --pub-rate=1 \
-  --topic-count=10 \
-  --max-duration-sec=180 --warmup-sec=10 \
-  --min-connected-sub-pct=90 \
---min-delivery-ratio-pct=95 \
---max-p95-latency-ms=3000 \
---consecutive-sla-breaches=20
-```
-
-single4
-
-```bash
-go run main.go \
-  --broker-host=43.205.176.30 --broker-port=1883 \
-  --out-dir=./results --test-name=single4 \
-  --fixed-subs=250 --fixed-pubs=25 \
-  --payload-kb=100 --pub-rate=1 \
-  --topic-count=10 \
-  --max-duration-sec=180 --warmup-sec=10 \
-  --min-connected-sub-pct=90 \
---min-delivery-ratio-pct=95 \
---max-p95-latency-ms=3000 \
---consecutive-sla-breaches=20
-```
-
-single5
-
-```bash
-go run main.go \
-  --broker-host=43.205.176.30 --broker-port=1883 \
-  --out-dir=./results --test-name=single5 \
-  --fixed-subs=250 --fixed-pubs=25 \
-  --payload-kb=100 --pub-rate=1 \
-  --topic-count=10 \
-  --max-duration-sec=180 --warmup-sec=10 \
-  --min-connected-sub-pct=90 \
---min-delivery-ratio-pct=95 \
---max-p95-latency-ms=3000 \
---consecutive-sla-breaches=20
-```
-
-single6
-
-```bash
-go run main.go \
-  --broker-host=43.205.176.30 --broker-port=1883 \
-  --out-dir=./results --test-name=single6 \
-  --fixed-subs=250 --fixed-pubs=25 \
-  --payload-kb=100 --pub-rate=1 \
-  --topic-count=10 \
-  --max-duration-sec=180 --warmup-sec=10 \
-  --min-connected-sub-pct=90 \
---min-delivery-ratio-pct=95 \
---max-p95-latency-ms=3000 \
---consecutive-sla-breaches=20
-```
-
-single7
-
-```bash
-go run main.go \
-  --broker-host=43.205.176.30 --broker-port=1883 \
-  --out-dir=./results --test-name=single7 \
-  --fixed-subs=500 --fixed-pubs=50 \
-  --payload-kb=100 --pub-rate=1 \
-  --topic-count=10 \
-  --max-duration-sec=180 --warmup-sec=10 \
-  --min-connected-sub-pct=90 \
---min-delivery-ratio-pct=95 \
---max-p95-latency-ms=3000 \
---consecutive-sla-breaches=20
-```
-
-single8
-
-```bash
-go run main.go \
-  --broker-host=43.205.176.30 --broker-port=1883 \
-  --out-dir=./results --test-name=single8 \
-  --fixed-subs=500 --fixed-pubs=50 \
-  --payload-kb=100 --pub-rate=1 \
-  --topic-count=10 \
-  --max-duration-sec=180 --warmup-sec=10 \
-  --min-connected-sub-pct=90 \
---min-delivery-ratio-pct=95 \
---max-p95-latency-ms=3000 \
---consecutive-sla-breaches=20
-```
-
-single9
-
-```bash
-go run main.go \
-  --broker-host=43.205.176.30 --broker-port=1883 \
-  --out-dir=./results --test-name=single9 \
-  --fixed-subs=500 --fixed-pubs=50 \
+  --fixed-subs=600 --fixed-pubs=30 \
   --payload-kb=100 --pub-rate=1 \
   --topic-count=10 \
   --max-duration-sec=180 --warmup-sec=10 \
@@ -302,7 +194,7 @@ cluster1
 go run main.go \
   --brokers-json=./brokers.json \
   --out-dir=./results --test-name=cluster1 \
-  --fixed-subs=500 --fixed-pubs=10 \
+  --fixed-subs=100 --fixed-pubs=10 \
   --payload-kb=100 --pub-rate=1 \
   --topic-count=10 \
   --max-duration-sec=180 --warmup-sec=10 \
@@ -318,7 +210,7 @@ cluster2
 go run main.go \
   --brokers-json=./brokers.json \
   --out-dir=./results --test-name=cluster2 \
-  --fixed-subs=500 --fixed-pubs=10 \
+  --fixed-subs=300 --fixed-pubs=20 \
   --payload-kb=100 --pub-rate=1 \
   --topic-count=10 \
   --max-duration-sec=180 --warmup-sec=10 \
@@ -334,103 +226,7 @@ cluster3
 go run main.go \
   --brokers-json=./brokers.json \
   --out-dir=./results --test-name=cluster3 \
-  --fixed-subs=500 --fixed-pubs=10 \
-  --payload-kb=100 --pub-rate=1 \
-  --topic-count=10 \
-  --max-duration-sec=180 --warmup-sec=10 \
-  --min-connected-sub-pct=90 \
---min-delivery-ratio-pct=95 \
---max-p95-latency-ms=3000 \
---consecutive-sla-breaches=20
-```
-
-cluster4
-
-```bash
-go run main.go \
-  --brokers-json=./brokers.json \
-  --out-dir=./results --test-name=cluster4 \
-  --fixed-subs=1000 --fixed-pubs=25 \
-  --payload-kb=100 --pub-rate=1 \
-  --topic-count=10 \
-  --max-duration-sec=180 --warmup-sec=10 \
-  --min-connected-sub-pct=90 \
---min-delivery-ratio-pct=95 \
---max-p95-latency-ms=3000 \
---consecutive-sla-breaches=20
-```
-
-cluster5
-
-```bash
-go run main.go \
-  --brokers-json=./brokers.json \
-  --out-dir=./results --test-name=cluster5 \
-  --fixed-subs=1000 --fixed-pubs=25 \
-  --payload-kb=100 --pub-rate=1 \
-  --topic-count=10 \
-  --max-duration-sec=180 --warmup-sec=10 \
-  --min-connected-sub-pct=90 \
---min-delivery-ratio-pct=95 \
---max-p95-latency-ms=3000 \
---consecutive-sla-breaches=20
-```
-
-cluster6
-
-```bash
-go run main.go \
-  --brokers-json=./brokers.json \
-  --out-dir=./results --test-name=cluster6 \
-  --fixed-subs=1000 --fixed-pubs=25 \
-  --payload-kb=100 --pub-rate=1 \
-  --topic-count=10 \
-  --max-duration-sec=180 --warmup-sec=10 \
-  --min-connected-sub-pct=90 \
---min-delivery-ratio-pct=95 \
---max-p95-latency-ms=3000 \
---consecutive-sla-breaches=20
-```
-
-cluster7
-
-```bash
-go run main.go \
-  --brokers-json=./brokers.json \
-  --out-dir=./results --test-name=cluster7 \
-  --fixed-subs=2000 --fixed-pubs=50 \
-  --payload-kb=100 --pub-rate=1 \
-  --topic-count=10 \
-  --max-duration-sec=180 --warmup-sec=10 \
-  --min-connected-sub-pct=90 \
---min-delivery-ratio-pct=95 \
---max-p95-latency-ms=3000 \
---consecutive-sla-breaches=20
-```
-
-cluster8
-
-```bash
-go run main.go \
-  --brokers-json=./brokers.json \
-  --out-dir=./results --test-name=cluster8 \
-  --fixed-subs=2000 --fixed-pubs=50 \
-  --payload-kb=100 --pub-rate=1 \
-  --topic-count=10 \
-  --max-duration-sec=180 --warmup-sec=10 \
-  --min-connected-sub-pct=90 \
---min-delivery-ratio-pct=95 \
---max-p95-latency-ms=3000 \
---consecutive-sla-breaches=20
-```
-
-cluster9
-
-```bash
-go run main.go \
-  --brokers-json=./brokers.json \
-  --out-dir=./results --test-name=cluster9 \
-  --fixed-subs=2000 --fixed-pubs=50 \
+  --fixed-subs=600 --fixed-pubs=30 \
   --payload-kb=100 --pub-rate=1 \
   --topic-count=10 \
   --max-duration-sec=180 --warmup-sec=10 \
