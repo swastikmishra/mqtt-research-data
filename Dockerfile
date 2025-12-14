@@ -1,19 +1,17 @@
-FROM ubuntu:22.04
+FROM golang:1.18-bullseye AS build
+WORKDIR /src
 
-ENV DEBIAN_FRONTEND=noninteractive
+COPY go.mod go.sum ./
+RUN go mod download
 
-#install dependencies, and build mosquitto
-RUN apt-get update
-RUN apt-get install curl -y
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /out/loadtest ./cmd/loadtest
 
-RUN apt install software-properties-common -y
-RUN add-apt-repository ppa:deadsnakes/ppa
-
-RUN apt-get update
-
-RUN apt-get install python3.10 -y
-
-# Install uv
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh
-
+FROM debian:bullseye-slim
 WORKDIR /app
+COPY --from=build /out/loadtest /app/loadtest
+
+# Write outputs here (we'll mount a volume)
+RUN mkdir -p /app/results
+
+ENTRYPOINT ["/app/loadtest"]
