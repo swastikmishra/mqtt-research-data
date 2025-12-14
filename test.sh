@@ -10,6 +10,7 @@ fi
 BROKER_HOST="$1"
 BROKER_PORT="$2"
 TEST_NAME="$3"
+PAYLOAD_SIZES="${4:-}"
 
 RESULTS_DIR="$(pwd)/results"
 mkdir -p "$RESULTS_DIR"
@@ -30,6 +31,7 @@ docker compose build loadtest
 BROKER_HOST="${BROKER_HOST}" \
 BROKER_PORT="${BROKER_PORT}" \
 TEST_NAME="${TEST_NAME}" \
+PAYLOAD_SIZES="${PAYLOAD_SIZES}" \
 docker compose up --abort-on-container-exit loadtest
 
 EXIT_CODE=$?

@@ -60,13 +60,13 @@ docker compose build
 ### 2. Run a test
 
 ``` bash
-./test.sh <broker_ip> <broker_port> <test_name>
+./test.sh <broker_ip> <broker_port> <payload_kb> <test_name>
 ```
 
 Example:
 
 ``` bash
-./test.sh 203.0.113.10 1883 single-broker-baseline
+./test.sh 203.0.113.10 1883 10 single-broker-baseline
 ```
 
 All clients will connect directly to the specified broker.
