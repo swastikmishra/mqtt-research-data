@@ -1,147 +1,368 @@
-# MQTT Load Testing Tool (QoS 0)
+# MQTT Mosquitto Load Test Tool (Go)
 
-This repository contains a **Go-based MQTT load testing tool** designed
-to evaluate the scalability of Mosquitto brokers in **single-broker**
-and **clustered** deployments.
+A Go-based MQTT load-testing tool for benchmarking **single Mosquitto broker** vs **clustered brokers** (with deterministic client-to-broker mapping).  
+Designed for research-style experiments where **subscriber count**, **publisher count**, and **payload size** are controlled, and results focus on **delivery correctness** and **latency under load**.
 
-The tool acts as a **smart client** that concurrently spawns publishers
-and subscribers, ramps client counts over time, and records detailed
-performance metrics for research and benchmarking purposes.
+---
 
-------------------------------------------------------------------------
-
-## Features
-
--   MQTT **QoS 0** testing (no TLS)
--   Concurrent **publishers and subscribers**
--   **Ramped load** (adds clients every fixed interval)
--   Measures:
-    -   successful vs failed connections
-    -   message throughput
-    -   end-to-end latency (p50/p95/p99)
--   Outputs results in **JSON (summary)** and **CSV (time series)**
-    formats
--   Dockerized for **reproducible experiments**
-
-------------------------------------------------------------------------
-
-## Prerequisites
-
--   Docker ≥ 20.x
--   Docker Compose ≥ 2.x
--   Network access to the target MQTT broker
-
-------------------------------------------------------------------------
-
-## Directory Structure
-
-    .
-    ├── Dockerfile
-    ├── docker-compose.yml
-    ├── test.sh
-    ├── results/
-    │   ├── <test-name>.json
-    │   └── <test-name>.csv
-    ├── cmd/
-    │   └── loadtest/
-    │       └── main.go
-    └── README.md
-
-------------------------------------------------------------------------
-
-## Running a Test
-
-### 1. Build the load testing container
-
-``` bash
-docker compose build
+### Building the tool
+```bash
+go mod tidy
+go build -o loadtest
 ```
 
-### 2. Run a test (Single)
+## What this tool measures (paper-friendly)
 
-``` bash
-./test.sh <broker_ip> <broker_port> <payload_kb> <test_name>
-```
+### 1) Delivery & Correctness (Data Plane)
+
+Because every subscriber subscribes to **all topics** (by default), each published message is expected to be delivered to **every connected subscriber**.
+
+Per second:
+
+-   **Published (Δpubs_sent)**: number of successful publishes in that second
+-   **Received (Δmsgs_recv)**: total messages received by subscribers in that second
+-   **Expected deliveries (Δexpected)**:
+    -   `Δexpected = Δpubs_sent × connected_subs`
+-   **Delivery ratio**:
+    -   `delivery_ratio = Δmsgs_recv / Δexpected` (when Δexpected > 0)
+-   **Loss / Duplicate / Reorder (estimated)**:
+    -   Uses `(pub_id, seq)` embedded in payload to detect:
+        -   **lost deliveries** (sequence gaps)
+        -   **duplicates**
+        -   **reordered deliveries**
+
+> Note: Loss/dup/reorder are tracked from the subscriber’s perspective and are most meaningful when the topic/subscription model stays fixed.
+
+### 2) Latency (End-to-End)
+
+Per message sample:
+
+-   **publish_ts_unix_nano** (written by publisher)
+-   **recv_ts_unix_nano** (measured at subscriber)
+-   **e2e_latency_ms = (recv - pub) / 1e6**
+
+Reported as:
+
+-   p50 / p95 / p99 (approx bucket-midpoint quantiles)
+-   mean / stddev / min / max
+
+### 3) Client Threshold / SLA-style Stop Conditions (Optional)
+
+Runs can stop automatically if quality degrades for consecutive windows:
+
+-   connected subscribers fall below a % of target
+-   delivery ratio falls below a % threshold
+-   p95 latency exceeds a threshold
+
+---
+
+## Output files
+
+Each run produces:
+
+1. **Traffic & delivery metrics** (per second)
+
+-   `results/<testname>.traffic.csv`
+
+Includes per-second deltas:
+
+-   conn/disconnect deltas (pub + sub split)
+-   pubs_sent / msgs_recv / expected deliveries
+-   delivery ratio
+-   lost/dup/reorder deltas
+-   latency p50/p95/p99 (global so far)
+
+2. **Raw latency samples** (one row per received message sample)
+
+-   `results/<testname>.latency.csv`
+
+Columns include:
+
+-   `pub_ts_unix_nano`, `recv_ts_unix_nano`, `pub_id`, `seq`, `latency_ms`, `topic`
+
+3. **Final summary JSON**
+
+-   `results/<testname>.json`
+
+Includes:
+
+-   totals, peaks, overall delivery ratio
+-   latency quantiles + mean/std/min/max
+-   stop reason and config snapshot
+
+---
+
+## Modes
+
+### A) Single broker mode
+
+Connect all clients to one broker:
+
+-   `--broker-host`
+-   `--broker-port`
+
+### B) Cluster mode
+
+Distribute clients across brokers (deterministic):
+
+-   `--brokers-json=./brokers.json`
+
+Client assignment is deterministic by hashing the client ID.
+
+---
+
+## brokers.json format (cluster mode)
 
 Example:
 
-``` bash
-./test.sh 13.201.32.55 1883 10 single-10kb
+```json
+{
+    "mode": "cluster",
+    "brokers": [
+        { "id": "b1", "host": "10.0.0.11", "port": 1883 },
+        { "id": "b2", "host": "10.0.0.12", "port": 1883 },
+        { "id": "b3", "host": "10.0.0.13", "port": 1883 }
+    ]
+}
 ```
 
-All clients will connect directly to the specified broker.
+## Tests
 
-### 3. Run a test (Clustered)
+| ID  | Type    | Subs Count | Pubs Count | Payload (KB) | Duration (Seconds) | Test Name |
+| --- | ------- | ---------- | ---------- | ------------ | ------------------ | --------- |
+| 1   | single  | 100        | 10         | 100          | 300                | single1   |
+| 2   | single  | 100        | 10         | 100          | 300                | single2   |
+| 3   | single  | 100        | 10         | 100          | 300                | single3   |
+| 4   | single  | 250        | 25         | 100          | 300                | single4   |
+| 5   | single  | 250        | 25         | 100          | 300                | single5   |
+| 6   | single  | 250        | 25         | 100          | 300                | single6   |
+| 7   | single  | 500        | 50         | 100          | 300                | single7   |
+| 8   | single  | 500        | 50         | 100          | 300                | single8   |
+| 9   | single  | 500        | 50         | 100          | 300                | single9   |
+| 1   | cluster | 100        | 10         | 100          | 300                | cluster1  |
+| 2   | cluster | 100        | 10         | 100          | 300                | cluster2  |
+| 3   | cluster | 100        | 10         | 100          | 300                | cluster3  |
+| 4   | cluster | 250        | 25         | 100          | 300                | cluster4  |
+| 5   | cluster | 250        | 25         | 100          | 300                | cluster5  |
+| 6   | cluster | 250        | 25         | 100          | 300                | cluster6  |
+| 7   | cluster | 500        | 50         | 100          | 300                | cluster7  |
+| 8   | cluster | 500        | 50         | 100          | 300                | cluster8  |
+| 9   | cluster | 500        | 50         | 100          | 300                | cluster9  |
 
+### Test Commands:
 
-``` bash
-./test.sh <brokers_json_file> <payload_kb> <test_name> <duration_secs>
+single1
+
+```bash
+go run main.go \
+  --broker-host=127.0.0.1 --broker-port=1883 \
+  --out-dir=./results --test-name=single1 \
+  --fixed-subs=100 --fixed-pubs=10 \
+  --payload-kb=100 --pub-rate=1 \
+  --topic-count=10 \
+  --max-duration-sec=300 --warmup-sec=10
 ```
 
-Example (5 mins default):
+single2
 
-``` bash
-./test-clustered.sh brokers.json 10 cluster-10kb
+```bash
+go run main.go \
+  --broker-host=127.0.0.1 --broker-port=1883 \
+  --out-dir=./results --test-name=single2 \
+  --fixed-subs=100 --fixed-pubs=10 \
+  --payload-kb=100 --pub-rate=1 \
+  --topic-count=10 \
+  --max-duration-sec=300 --warmup-sec=10
 ```
 
+single3
 
-Example (10 mins):
-
-``` bash
-./test-clustered.sh brokers.json 10 cluster-10kb 600
+```bash
+go run main.go \
+  --broker-host=127.0.0.1 --broker-port=1883 \
+  --out-dir=./results --test-name=single3 \
+  --fixed-subs=100 --fixed-pubs=10 \
+  --payload-kb=100 --pub-rate=1 \
+  --topic-count=10 \
+  --max-duration-sec=300 --warmup-sec=10
 ```
 
+single4
 
-------------------------------------------------------------------------
+```bash
+go run main.go \
+  --broker-host=127.0.0.1 --broker-port=1883 \
+  --out-dir=./results --test-name=single4 \
+  --fixed-subs=250 --fixed-pubs=25 \
+  --payload-kb=100 --pub-rate=1 \
+  --topic-count=10 \
+  --max-duration-sec=300 --warmup-sec=10
+```
 
-## Output Artifacts
+single5
 
-After the test completes, results are written to the `results/`
-directory.
+```bash
+go run main.go \
+  --broker-host=127.0.0.1 --broker-port=1883 \
+  --out-dir=./results --test-name=single5 \
+  --fixed-subs=250 --fixed-pubs=25 \
+  --payload-kb=100 --pub-rate=1 \
+  --topic-count=10 \
+  --max-duration-sec=300 --warmup-sec=10
+```
 
-### JSON Summary
+single6
 
-    results/<test-name>.json
+```bash
+go run main.go \
+  --broker-host=127.0.0.1 --broker-port=1883 \
+  --out-dir=./results --test-name=single6 \
+  --fixed-subs=250 --fixed-pubs=25 \
+  --payload-kb=100 --pub-rate=1 \
+  --topic-count=10 \
+  --max-duration-sec=300 --warmup-sec=10
+```
 
-Contains: - test configuration - peak stable client count - failure
-reason (if any) - latency percentiles - aggregate throughput
+single7
 
-### CSV Time Series
+```bash
+go run main.go \
+  --broker-host=127.0.0.1 --broker-port=1883 \
+  --out-dir=./results --test-name=single7 \
+  --fixed-subs=500 --fixed-pubs=50 \
+  --payload-kb=100 --pub-rate=1 \
+  --topic-count=10 \
+  --max-duration-sec=300 --warmup-sec=10
+```
 
-    results/<test-name>.csv
+single8
 
-Contains one row per measurement interval (e.g., per second or ramp
-step), including: - connected clients - connection success/failure
-counts - messages sent/received - delivery rate - latency percentiles
+```bash
+go run main.go \
+  --broker-host=127.0.0.1 --broker-port=1883 \
+  --out-dir=./results --test-name=single8 \
+  --fixed-subs=500 --fixed-pubs=50 \
+  --payload-kb=100 --pub-rate=1 \
+  --topic-count=10 \
+  --max-duration-sec=300 --warmup-sec=10
+```
 
-These files are suitable for direct import into plotting tools or
-statistical analysis frameworks.
+single9
 
-------------------------------------------------------------------------
+```bash
+go run main.go \
+  --broker-host=127.0.0.1 --broker-port=1883 \
+  --out-dir=./results --test-name=single9 \
+  --fixed-subs=500 --fixed-pubs=50 \
+  --payload-kb=100 --pub-rate=1 \
+  --topic-count=10 \
+  --max-duration-sec=300 --warmup-sec=10
+```
 
-## Experiment Methodology
+cluster1
 
-Typical experiment flow: 1. Start with a low number of clients 2. Ramp
-clients every fixed interval (e.g., every 10 seconds) 3. Maintain load
-briefly at each step 4. Stop when stability criteria are violated (e.g.,
-connection failures or excessive latency)
+```bash
+go run main.go \
+  --brokers-json=./brokers.json \
+  --out-dir=./results --test-name=cluster1 \
+  --fixed-subs=100 --fixed-pubs=10 \
+  --payload-kb=100 --pub-rate=1 \
+  --topic-count=10 \
+  --max-duration-sec=300 --warmup-sec=10
+```
 
-This enables precise measurement of: - maximum stable connections -
-throughput under fan-out - latency degradation under load
+cluster2
 
-------------------------------------------------------------------------
+```bash
+go run main.go \
+  --brokers-json=./brokers.json \
+  --out-dir=./results --test-name=cluster2 \
+  --fixed-subs=100 --fixed-pubs=10 \
+  --payload-kb=100 --pub-rate=1 \
+  --topic-count=10 \
+  --max-duration-sec=300 --warmup-sec=10
+```
 
-## Intended Use
+cluster3
 
-This tool is designed for: - evaluating Mosquitto scalability limits -
-comparing single-broker vs clustered architectures - academic and
-industrial research on MQTT performance
+```bash
+go run main.go \
+  --brokers-json=./brokers.json \
+  --out-dir=./results --test-name=cluster3 \
+  --fixed-subs=100 --fixed-pubs=10 \
+  --payload-kb=100 --pub-rate=1 \
+  --topic-count=10 \
+  --max-duration-sec=300 --warmup-sec=10
+```
 
-It is **not** intended as a production monitoring or benchmarking
-service.
+cluster4
 
-------------------------------------------------------------------------
+```bash
+go run main.go \
+  --brokers-json=./brokers.json \
+  --out-dir=./results --test-name=cluster4 \
+  --fixed-subs=250 --fixed-pubs=25 \
+  --payload-kb=100 --pub-rate=1 \
+  --topic-count=10 \
+  --max-duration-sec=300 --warmup-sec=10
+```
 
-## License
+cluster5
 
-MIT (or specify your preferred license)
+```bash
+go run main.go \
+  --brokers-json=./brokers.json \
+  --out-dir=./results --test-name=cluster5 \
+  --fixed-subs=250 --fixed-pubs=25 \
+  --payload-kb=100 --pub-rate=1 \
+  --topic-count=10 \
+  --max-duration-sec=300 --warmup-sec=10
+```
+
+cluster6
+
+```bash
+go run main.go \
+  --brokers-json=./brokers.json \
+  --out-dir=./results --test-name=cluster6 \
+  --fixed-subs=250 --fixed-pubs=25 \
+  --payload-kb=100 --pub-rate=1 \
+  --topic-count=10 \
+  --max-duration-sec=300 --warmup-sec=10
+```
+
+cluster7
+
+```bash
+go run main.go \
+  --brokers-json=./brokers.json \
+  --out-dir=./results --test-name=cluster7 \
+  --fixed-subs=500 --fixed-pubs=50 \
+  --payload-kb=100 --pub-rate=1 \
+  --topic-count=10 \
+  --max-duration-sec=300 --warmup-sec=10
+```
+
+cluster8
+
+```bash
+go run main.go \
+  --brokers-json=./brokers.json \
+  --out-dir=./results --test-name=cluster8 \
+  --fixed-subs=500 --fixed-pubs=50 \
+  --payload-kb=100 --pub-rate=1 \
+  --topic-count=10 \
+  --max-duration-sec=300 --warmup-sec=10
+```
+
+cluster9
+
+```bash
+go run main.go \
+  --brokers-json=./brokers.json \
+  --out-dir=./results --test-name=cluster9 \
+  --fixed-subs=500 --fixed-pubs=50 \
+  --payload-kb=100 --pub-rate=1 \
+  --topic-count=10 \
+  --max-duration-sec=300 --warmup-sec=10
+```
