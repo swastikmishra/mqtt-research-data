@@ -130,24 +130,24 @@ Example:
 
 | ID  | Type    | Subs Count | Pubs Count | Payload (KB) | Duration (Seconds) | Test Name |
 | --- | ------- | ---------- | ---------- | ------------ | ------------------ | --------- |
-| 1   | single  | 100        | 10         | 100          | 180                | single1   |
-| 2   | single  | 100        | 10         | 100          | 180                | single2   |
-| 3   | single  | 100        | 10         | 100          | 180                | single3   |
-| 4   | single  | 250        | 25         | 100          | 180                | single4   |
-| 5   | single  | 250        | 25         | 100          | 180                | single5   |
-| 6   | single  | 250        | 25         | 100          | 180                | single6   |
-| 7   | single  | 500        | 50         | 100          | 180                | single7   |
-| 8   | single  | 500        | 50         | 100          | 180                | single8   |
-| 9   | single  | 500        | 50         | 100          | 180                | single9   |
-| 1   | cluster | 100        | 10         | 100          | 180                | cluster1  |
-| 2   | cluster | 100        | 10         | 100          | 180                | cluster2  |
-| 3   | cluster | 100        | 10         | 100          | 180                | cluster3  |
-| 4   | cluster | 250        | 25         | 100          | 180                | cluster4  |
-| 5   | cluster | 250        | 25         | 100          | 180                | cluster5  |
-| 6   | cluster | 250        | 25         | 100          | 180                | cluster6  |
-| 7   | cluster | 500        | 50         | 100          | 180                | cluster7  |
-| 8   | cluster | 500        | 50         | 100          | 180                | cluster8  |
-| 9   | cluster | 500        | 50         | 100          | 180                | cluster9  |
+| 1   | single  | 100        | 10         | 100          | 120                | single1   |
+| 2   | single  | 100        | 10         | 100          | 120                | single2   |
+| 3   | single  | 100        | 10         | 100          | 120                | single3   |
+| 4   | single  | 250        | 25         | 100          | 120                | single4   |
+| 5   | single  | 250        | 25         | 100          | 120                | single5   |
+| 6   | single  | 250        | 25         | 100          | 120                | single6   |
+| 7   | single  | 500        | 50         | 100          | 120                | single7   |
+| 8   | single  | 500        | 50         | 100          | 120                | single8   |
+| 9   | single  | 500        | 50         | 100          | 120                | single9   |
+| 1   | cluster | 100        | 10         | 100          | 120                | cluster1  |
+| 2   | cluster | 100        | 10         | 100          | 120                | cluster2  |
+| 3   | cluster | 100        | 10         | 100          | 120                | cluster3  |
+| 4   | cluster | 250        | 25         | 100          | 120                | cluster4  |
+| 5   | cluster | 250        | 25         | 100          | 120                | cluster5  |
+| 6   | cluster | 250        | 25         | 100          | 120                | cluster6  |
+| 7   | cluster | 500        | 50         | 100          | 120                | cluster7  |
+| 8   | cluster | 500        | 50         | 100          | 120                | cluster8  |
+| 9   | cluster | 500        | 50         | 100          | 120                | cluster9  |
 
 ### Test Commands:
 
@@ -160,7 +160,7 @@ go run main.go \
   --fixed-subs=100 --fixed-pubs=10 \
   --payload-kb=100 --pub-rate=1 \
   --topic-count=10 \
-  --max-duration-sec=180 --warmup-sec=10
+  --max-duration-sec=120 --warmup-sec=10
 ```
 
 single2
@@ -172,7 +172,7 @@ go run main.go \
   --fixed-subs=100 --fixed-pubs=10 \
   --payload-kb=100 --pub-rate=1 \
   --topic-count=10 \
-  --max-duration-sec=180 --warmup-sec=10
+  --max-duration-sec=120 --warmup-sec=10
 ```
 
 single3
@@ -184,7 +184,7 @@ go run main.go \
   --fixed-subs=100 --fixed-pubs=10 \
   --payload-kb=100 --pub-rate=1 \
   --topic-count=10 \
-  --max-duration-sec=180 --warmup-sec=10
+  --max-duration-sec=120 --warmup-sec=10
 ```
 
 single4
@@ -196,7 +196,7 @@ go run main.go \
   --fixed-subs=250 --fixed-pubs=25 \
   --payload-kb=100 --pub-rate=1 \
   --topic-count=10 \
-  --max-duration-sec=180 --warmup-sec=10
+  --max-duration-sec=120 --warmup-sec=10
 ```
 
 single5
@@ -208,7 +208,7 @@ go run main.go \
   --fixed-subs=250 --fixed-pubs=25 \
   --payload-kb=100 --pub-rate=1 \
   --topic-count=10 \
-  --max-duration-sec=180 --warmup-sec=10
+  --max-duration-sec=120 --warmup-sec=10
 ```
 
 single6
@@ -220,7 +220,7 @@ go run main.go \
   --fixed-subs=250 --fixed-pubs=25 \
   --payload-kb=100 --pub-rate=1 \
   --topic-count=10 \
-  --max-duration-sec=180 --warmup-sec=10
+  --max-duration-sec=120 --warmup-sec=10
 ```
 
 single7
@@ -232,7 +232,7 @@ go run main.go \
   --fixed-subs=500 --fixed-pubs=50 \
   --payload-kb=100 --pub-rate=1 \
   --topic-count=10 \
-  --max-duration-sec=180 --warmup-sec=10
+  --max-duration-sec=120 --warmup-sec=10
 ```
 
 single8
@@ -244,7 +244,7 @@ go run main.go \
   --fixed-subs=500 --fixed-pubs=50 \
   --payload-kb=100 --pub-rate=1 \
   --topic-count=10 \
-  --max-duration-sec=180 --warmup-sec=10
+  --max-duration-sec=120 --warmup-sec=10
 ```
 
 single9
@@ -256,7 +256,7 @@ go run main.go \
   --fixed-subs=500 --fixed-pubs=50 \
   --payload-kb=100 --pub-rate=1 \
   --topic-count=10 \
-  --max-duration-sec=180 --warmup-sec=10
+  --max-duration-sec=120 --warmup-sec=10
 ```
 
 cluster1
@@ -268,7 +268,7 @@ go run main.go \
   --fixed-subs=100 --fixed-pubs=10 \
   --payload-kb=100 --pub-rate=1 \
   --topic-count=10 \
-  --max-duration-sec=180 --warmup-sec=10
+  --max-duration-sec=120 --warmup-sec=10
 ```
 
 cluster2
@@ -280,7 +280,7 @@ go run main.go \
   --fixed-subs=100 --fixed-pubs=10 \
   --payload-kb=100 --pub-rate=1 \
   --topic-count=10 \
-  --max-duration-sec=180 --warmup-sec=10
+  --max-duration-sec=120 --warmup-sec=10
 ```
 
 cluster3
@@ -292,7 +292,7 @@ go run main.go \
   --fixed-subs=100 --fixed-pubs=10 \
   --payload-kb=100 --pub-rate=1 \
   --topic-count=10 \
-  --max-duration-sec=180 --warmup-sec=10
+  --max-duration-sec=120 --warmup-sec=10
 ```
 
 cluster4
@@ -304,7 +304,7 @@ go run main.go \
   --fixed-subs=250 --fixed-pubs=25 \
   --payload-kb=100 --pub-rate=1 \
   --topic-count=10 \
-  --max-duration-sec=180 --warmup-sec=10
+  --max-duration-sec=120 --warmup-sec=10
 ```
 
 cluster5
@@ -316,7 +316,7 @@ go run main.go \
   --fixed-subs=250 --fixed-pubs=25 \
   --payload-kb=100 --pub-rate=1 \
   --topic-count=10 \
-  --max-duration-sec=180 --warmup-sec=10
+  --max-duration-sec=120 --warmup-sec=10
 ```
 
 cluster6
@@ -328,7 +328,7 @@ go run main.go \
   --fixed-subs=250 --fixed-pubs=25 \
   --payload-kb=100 --pub-rate=1 \
   --topic-count=10 \
-  --max-duration-sec=180 --warmup-sec=10
+  --max-duration-sec=120 --warmup-sec=10
 ```
 
 cluster7
@@ -340,7 +340,7 @@ go run main.go \
   --fixed-subs=500 --fixed-pubs=50 \
   --payload-kb=100 --pub-rate=1 \
   --topic-count=10 \
-  --max-duration-sec=180 --warmup-sec=10
+  --max-duration-sec=120 --warmup-sec=10
 ```
 
 cluster8
@@ -352,7 +352,7 @@ go run main.go \
   --fixed-subs=500 --fixed-pubs=50 \
   --payload-kb=100 --pub-rate=1 \
   --topic-count=10 \
-  --max-duration-sec=180 --warmup-sec=10
+  --max-duration-sec=120 --warmup-sec=10
 ```
 
 cluster9
@@ -364,5 +364,5 @@ go run main.go \
   --fixed-subs=500 --fixed-pubs=50 \
   --payload-kb=100 --pub-rate=1 \
   --topic-count=10 \
-  --max-duration-sec=180 --warmup-sec=10
+  --max-duration-sec=120 --warmup-sec=10
 ```
