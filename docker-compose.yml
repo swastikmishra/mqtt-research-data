@@ -1,15 +1,11 @@
 services:
-
-  app:
-    build: .
+  loadtest:
+    build:
+      context: .
+    container_name: mqtt-loadtest
+    network_mode: host
     volumes:
-      - ./data:/app/data
-      - ./test-cases:/app/test-cases
-      - ./scripts:/app/scripts
+      - ./app:/app
     tty: true
-    ulimits:
-      nofile:
-        soft: 400053
-        hard: 400053
-    ports:
-      - 8080:8080
+    stdin_open: true
+    

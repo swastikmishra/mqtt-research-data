@@ -1,119 +1,126 @@
-# MQTT Research Data - Test Cases Overview
+# MQTT Load Testing Tool (QoS 0)
 
-## 00 Single
+This repository contains a **Go-based MQTT load testing tool** designed
+to evaluate the scalability of Mosquitto brokers in **single-broker**
+and **clustered** deployments.
 
-### Local Device (Broker + Pub-Sub)
-**Test Config:** [tests.json](test-cases/00%20Single/1.%20Local%20Device%20(Broker%20+%20Pub-Sub)/tests.json)
+The tool acts as a **smart client** that concurrently spawns publishers
+and subscribers, ramps client counts over time, and records detailed
+performance metrics for research and benchmarking purposes.
 
-| Code | Category | Users | Ramp up / sec | QoS | Message Size (KB) | Publish Rate (msg/sec/user) | Test Duration (mins) |
-|------|----------|-------|---------------|-----|-------------------|---------------------------|---------------------|
-| LOCAL-HS-A-Q0 | SINGLE | 1000 | 10 | Q0 | 1 | 1 | 10 |
-| LOCAL-HS-A-Q1 | SINGLE | 1000 | 10 | Q1 | 1 | 1 | 10 |
-| LOCAL-HS-A-Q2 | SINGLE | 1000 | 10 | Q2 | 1 | 1 | 10 |
-| LOCAL-HS-B-Q0 | SINGLE | 1000 | 100 | Q0 | 10 | 1 | 10 |
-| LOCAL-HS-B-Q1 | SINGLE | 1000 | 100 | Q1 | 10 | 1 | 10 |
-| LOCAL-HS-B-Q2 | SINGLE | 1000 | 100 | Q2 | 10 | 1 | 10 |
+------------------------------------------------------------------------
 
-### AWS (Broker + Pub-Sub)
-**Test Config:** [tests.json](test-cases/00%20Single/2.%20AWS%20(Broker%20+%20Pub-Sub)/tests.json)
+## Features
 
-| Code | Category | Users | Ramp up / sec | QoS | Message Size (KB) | Publish Rate (msg/sec/user) | Test Duration (mins) |
-|------|----------|-------|---------------|-----|-------------------|---------------------------|---------------------|
-| AWS-HS-A-Q0 | SINGLE | 1000 | 10 | Q0 | 1 | 1 | 10 |
-| AWS-HS-A-Q1 | SINGLE | 1000 | 10 | Q1 | 1 | 1 | 10 |
-| AWS-HS-A-Q2 | SINGLE | 1000 | 10 | Q2 | 1 | 1 | 10 |
-| AWS-HS-B-Q0 | SINGLE | 1000 | 100 | Q0 | 10 | 1 | 10 |
-| AWS-HS-B-Q1 | SINGLE | 1000 | 100 | Q1 | 10 | 1 | 10 |
-| AWS-HS-B-Q2 | SINGLE | 1000 | 100 | Q2 | 10 | 1 | 10 |
+-   MQTT **QoS 0** testing (no TLS)
+-   Concurrent **publishers and subscribers**
+-   **Ramped load** (adds clients every fixed interval)
+-   Measures:
+    -   successful vs failed connections
+    -   message throughput
+    -   end-to-end latency (p50/p95/p99)
+-   Outputs results in **JSON (summary)** and **CSV (time series)**
+    formats
+-   Dockerized for **reproducible experiments**
 
-### AWS (Broker) + Local (Pub-Sub)
-**Test Config:** [tests.json](test-cases/00%20Single/3.%20AWS%20(Broker)%20+%20Local%20(Pub-Sub)/tests.json)
+------------------------------------------------------------------------
 
-| Code | Category | Users | Ramp up / sec | QoS | Message Size (KB) | Publish Rate (msg/sec/user) | Test Duration (mins) |
-|------|----------|-------|---------------|-----|-------------------|---------------------------|---------------------|
-| AWS-LC-HS-A-Q0 | SINGLE | 1000 | 10 | Q0 | 1 | 1 | 10 |
-| AWS-LC-HS-A-Q1 | SINGLE | 1000 | 10 | Q1 | 1 | 1 | 10 |
-| AWS-LC-HS-A-Q2 | SINGLE | 1000 | 10 | Q2 | 1 | 1 | 10 |
-| AWS-LC-HS-B-Q0 | SINGLE | 1000 | 100 | Q0 | 10 | 1 | 10 |
-| AWS-LC-HS-B-Q1 | SINGLE | 1000 | 100 | Q1 | 10 | 1 | 10 |
-| AWS-LC-HS-B-Q2 | SINGLE | 1000 | 100 | Q2 | 10 | 1 | 10 |
+## Prerequisites
 
----
+-   Docker ≥ 20.x
+-   Docker Compose ≥ 2.x
+-   Network access to the target MQTT broker
 
-## 01 Horizontal
+------------------------------------------------------------------------
 
-### Local Device (Broker + Pub-Sub)
-**Test Config:** [tests.json](test-cases/01%20Horizontal/1.%20Local%20Device%20(Broker%20+%20Pub-Sub)/tests.json)
+## Directory Structure
 
-| Code | Category | Users | Ramp up / sec | QoS | Message Size (KB) | Publish Rate (msg/sec/user) | Test Duration (mins) |
-|------|----------|-------|---------------|-----|-------------------|---------------------------|---------------------|
-| LOCAL-HM-A-Q0 | HORIZONTAL | 1000 | 10 | Q0 | 1 | 1 | 10 |
-| LOCAL-HM-A-Q1 | HORIZONTAL | 1000 | 10 | Q1 | 1 | 1 | 10 |
-| LOCAL-HM-A-Q2 | HORIZONTAL | 1000 | 10 | Q2 | 1 | 1 | 10 |
-| LOCAL-HM-B-Q0 | HORIZONTAL | 1000 | 100 | Q0 | 10 | 1 | 10 |
-| LOCAL-HM-B-Q1 | HORIZONTAL | 1000 | 100 | Q1 | 10 | 1 | 10 |
-| LOCAL-HM-B-Q2 | HORIZONTAL | 1000 | 100 | Q2 | 10 | 1 | 10 |
+    .
+    ├── Dockerfile
+    ├── docker-compose.yml
+    ├── test.sh
+    ├── results/
+    │   ├── <test-name>.json
+    │   └── <test-name>.csv
+    ├── cmd/
+    │   └── loadtest/
+    │       └── main.go
+    └── README.md
 
-### AWS (Broker + Pub-Sub)
-**Test Config:** [tests.json](test-cases/01%20Horizontal/2.%20AWS%20(Broker%20+%20Pub-Sub)/tests.json)
+------------------------------------------------------------------------
 
-| Code | Category | Users | Ramp up / sec | QoS | Message Size (KB) | Publish Rate (msg/sec/user) | Test Duration (mins) |
-|------|----------|-------|---------------|-----|-------------------|---------------------------|---------------------|
-| AWS-HM-A-Q0 | HORIZONTAL | 1000 | 10 | Q0 | 1 | 1 | 10 |
-| AWS-HM-A-Q1 | HORIZONTAL | 1000 | 10 | Q1 | 1 | 1 | 10 |
-| AWS-HM-A-Q2 | HORIZONTAL | 1000 | 10 | Q2 | 1 | 1 | 10 |
-| AWS-HM-B-Q0 | HORIZONTAL | 1000 | 100 | Q0 | 10 | 1 | 10 |
-| AWS-HM-B-Q1 | HORIZONTAL | 1000 | 100 | Q1 | 10 | 1 | 10 |
-| AWS-HM-B-Q2 | HORIZONTAL | 1000 | 100 | Q2 | 10 | 1 | 10 |
+## Running a Test
 
-### AWS (Broker) + Local (Pub-Sub)
-**Test Config:** [tests.json](test-cases/01%20Horizontal/3.%20AWS%20(Broker)%20+%20Local%20(Pub-Sub)/tests.json)
+### 1. Build the load testing container
 
-| Code | Category | Users | Ramp up / sec | QoS | Message Size (KB) | Publish Rate (msg/sec/user) | Test Duration (mins) |
-|------|----------|-------|---------------|-----|-------------------|---------------------------|---------------------|
-| AWS-LC-HM-A-Q0 | HORIZONTAL | 1000 | 10 | Q0 | 1 | 1 | 10 |
-| AWS-LC-HM-A-Q1 | HORIZONTAL | 1000 | 10 | Q1 | 1 | 1 | 10 |
-| AWS-LC-HM-A-Q2 | HORIZONTAL | 1000 | 10 | Q2 | 1 | 1 | 10 |
-| AWS-LC-HM-B-Q0 | HORIZONTAL | 1000 | 100 | Q0 | 10 | 1 | 10 |
-| AWS-LC-HM-B-Q1 | HORIZONTAL | 1000 | 100 | Q1 | 10 | 1 | 10 |
-| AWS-LC-HM-B-Q2 | HORIZONTAL | 1000 | 100 | Q2 | 10 | 1 | 10 |
+``` bash
+docker compose build
+```
 
----
+### 2. Run a test
 
-## 02 Vertical
+``` bash
+./test.sh <broker_ip> <broker_port> <payload_kb> <test_name>
+```
 
-### Local Device (Broker + Pub-Sub)
-**Test Config:** [tests.json](test-cases/02%20Vertical/1.%20Local%20Device%20(Broker%20+%20Pub-Sub)/tests.json)
+Example:
 
-| Code | Category | Users | Ramp up / sec | QoS | Message Size (KB) | Publish Rate (msg/sec/user) | Test Duration (mins) |
-|------|----------|-------|---------------|-----|-------------------|---------------------------|---------------------|
-| LOCAL-VM-A-Q0 | VERTICAL | 1000 | 10 | Q0 | 1 | 1 | 10 |
-| LOCAL-VM-A-Q1 | VERTICAL | 1000 | 10 | Q1 | 1 | 1 | 10 |
-| LOCAL-VM-A-Q2 | VERTICAL | 1000 | 10 | Q2 | 1 | 1 | 10 |
-| LOCAL-VM-B-Q0 | VERTICAL | 1000 | 100 | Q0 | 10 | 1 | 10 |
-| LOCAL-VM-B-Q1 | VERTICAL | 1000 | 100 | Q1 | 10 | 1 | 10 |
-| LOCAL-VM-B-Q2 | VERTICAL | 1000 | 100 | Q2 | 10 | 1 | 10 |
+``` bash
+./test.sh 13.201.32.55 1883 10 single-10kb
+```
 
-### AWS (Broker + Pub-Sub)
-**Test Config:** [tests.json](test-cases/02%20Vertical/2.%20AWS%20(Broker%20+%20Pub-Sub)/tests.json)
+All clients will connect directly to the specified broker.
 
-| Code | Category | Users | Ramp up / sec | QoS | Message Size (KB) | Publish Rate (msg/sec/user) | Test Duration (mins) |
-|------|----------|-------|---------------|-----|-------------------|---------------------------|---------------------|
-| AWS-VM-A-Q0 | VERTICAL | 1000 | 10 | Q0 | 1 | 1 | 10 |
-| AWS-VM-A-Q1 | VERTICAL | 1000 | 10 | Q1 | 1 | 1 | 10 |
-| AWS-VM-A-Q2 | VERTICAL | 1000 | 10 | Q2 | 1 | 1 | 10 |
-| AWS-VM-B-Q0 | VERTICAL | 1000 | 100 | Q0 | 10 | 1 | 10 |
-| AWS-VM-B-Q1 | VERTICAL | 1000 | 100 | Q1 | 10 | 1 | 10 |
-| AWS-VM-B-Q2 | VERTICAL | 1000 | 100 | Q2 | 10 | 1 | 10 |
+------------------------------------------------------------------------
 
-### AWS (Broker) + Local (Pub-Sub)
-**Test Config:** [tests.json](test-cases/02%20Vertical/3.%20AWS%20(Broker)%20+%20Local%20(Pub-Sub)/tests.json)
+## Output Artifacts
 
-| Code | Category | Users | Ramp up / sec | QoS | Message Size (KB) | Publish Rate (msg/sec/user) | Test Duration (mins) |
-|------|----------|-------|---------------|-----|-------------------|---------------------------|---------------------|
-| AWS-LC-VM-A-Q0 | VERTICAL | 1000 | 10 | Q0 | 1 | 1 | 10 |
-| AWS-LC-VM-A-Q1 | VERTICAL | 1000 | 10 | Q1 | 1 | 1 | 10 |
-| AWS-LC-VM-A-Q2 | VERTICAL | 1000 | 10 | Q2 | 1 | 1 | 10 |
-| AWS-LC-VM-B-Q0 | VERTICAL | 1000 | 100 | Q0 | 10 | 1 | 10 |
-| AWS-LC-VM-B-Q1 | VERTICAL | 1000 | 100 | Q1 | 10 | 1 | 10 |
-| AWS-LC-VM-B-Q2 | VERTICAL | 1000 | 100 | Q2 | 10 | 1 | 10 |
+After the test completes, results are written to the `results/`
+directory.
+
+### JSON Summary
+
+    results/<test-name>.json
+
+Contains: - test configuration - peak stable client count - failure
+reason (if any) - latency percentiles - aggregate throughput
+
+### CSV Time Series
+
+    results/<test-name>.csv
+
+Contains one row per measurement interval (e.g., per second or ramp
+step), including: - connected clients - connection success/failure
+counts - messages sent/received - delivery rate - latency percentiles
+
+These files are suitable for direct import into plotting tools or
+statistical analysis frameworks.
+
+------------------------------------------------------------------------
+
+## Experiment Methodology
+
+Typical experiment flow: 1. Start with a low number of clients 2. Ramp
+clients every fixed interval (e.g., every 10 seconds) 3. Maintain load
+briefly at each step 4. Stop when stability criteria are violated (e.g.,
+connection failures or excessive latency)
+
+This enables precise measurement of: - maximum stable connections -
+throughput under fan-out - latency degradation under load
+
+------------------------------------------------------------------------
+
+## Intended Use
+
+This tool is designed for: - evaluating Mosquitto scalability limits -
+comparing single-broker vs clustered architectures - academic and
+industrial research on MQTT performance
+
+It is **not** intended as a production monitoring or benchmarking
+service.
+
+------------------------------------------------------------------------
+
+## License
+
+MIT (or specify your preferred license)
