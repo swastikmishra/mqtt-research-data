@@ -1,7 +1,52 @@
 [
   {
-    "name": "broker",
+    "name": "brokerA",
     "host": "localhost",
     "port": 1883
+  },
+  {
+    "name": "brokerB",
+    "host": "localhost",
+    "port": 1884
+  },
+  {
+    "name": "brokerC",
+    "host": "localhost",
+    "port": 1885
+  },
+  {
+    "name": "brokerD",
+    "host": "localhost",
+    "port": 1886
+  },
+  {
+    "name": "brokerE",
+    "host": "localhost",
+    "port": 1887
+  },
+  {
+    "name": "brokerF",
+    "host": "localhost",
+    "port": 1888
+  },
+  {
+    "name": "brokerG",
+    "host": "localhost",
+    "port": 1889
+  },
+  {
+    "name": "brokerH",
+    "host": "localhost",
+    "port": 1890
+  },
+  {
+    "name": "brokerI",
+    "host": "localhost",
+    "port": 1891
+  },
+  {
+    "name": "brokerJ",
+    "host": "localhost",
+    "port": 1892
   }
 ]

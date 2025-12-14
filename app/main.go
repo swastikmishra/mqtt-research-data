@@ -186,6 +186,9 @@ func (m *TestMetrics) ExportToJSON(testCode string, broker Broker, config *LoadT
 	// Create test result structure
 	testResult := TestResult{
 		TestCode:   testCode,
+		BrokerName: broker.Name,
+		BrokerHost: broker.Host,
+		BrokerPort: broker.Port,
 		TestConfiguration: TestConfiguration{
 			TotalUsers:        config.TotalUsers,
 			RampUpRate:        config.RampUpRate,
@@ -226,6 +229,94 @@ func (m *TestMetrics) ExportToJSON(testCode string, broker Broker, config *LoadT
 	return nil
 }
 
+// ExportAggregatedResultsToJSON exports aggregated test results across all brokers
+func ExportAggregatedResultsToJSON(testCode string, brokers []Broker, config *LoadTestConfig, totalSuccessfulPubs, totalFailedPubs, totalConnections, totalFailedConnections int64, testStartTime, testEndTime time.Time) error {
+	// Ensure results directory exists
+	testCasesDir := "results"
+	if err := os.MkdirAll(testCasesDir, 0755); err != nil {
+		return fmt.Errorf("failed to create results directory: %v", err)
+	}
+
+	// Create filename for aggregated results
+	filename := filepath.Join(testCasesDir, fmt.Sprintf("%s-AGGREGATED.json", testCode))
+
+	// Calculate aggregated metrics
+	duration := testEndTime.Sub(testStartTime)
+	totalMessages := totalSuccessfulPubs + totalFailedPubs
+	var successRate, connectionSuccessRate, throughput float64
+
+	if totalMessages > 0 {
+		successRate = float64(totalSuccessfulPubs) / float64(totalMessages) * 100
+	}
+	if totalConnections > 0 {
+		connectionSuccessRate = float64(totalConnections-totalFailedConnections) / float64(totalConnections) * 100
+	}
+	if duration.Seconds() > 0 {
+		throughput = float64(totalSuccessfulPubs) / duration.Seconds()
+	}
+
+	// Create broker summary
+	brokerSummary := make([]map[string]interface{}, len(brokers))
+	usersPerBroker := config.TotalUsers / len(brokers)
+	remainingUsers := config.TotalUsers % len(brokers)
+	
+	for i, broker := range brokers {
+		users := usersPerBroker
+		if i < remainingUsers {
+			users++
+		}
+		brokerSummary[i] = map[string]interface{}{
+			"name": broker.Name,
+			"host": broker.Host,
+			"port": broker.Port,
+			"assignedUsers": users,
+		}
+	}
+
+	// Create aggregated result structure
+	aggregatedResult := map[string]interface{}{
+		"testCode": testCode,
+		"testType": "DISTRIBUTED_LOAD_TEST",
+		"brokerCount": len(brokers),
+		"brokerSummary": brokerSummary,
+		"testConfiguration": TestConfiguration{
+			TotalUsers:        config.TotalUsers,
+			RampUpRate:        config.RampUpRate,
+			QoS:               config.QoS,
+			MessageSizeKB:     config.MessageSizeKB,
+			PublishRatePerSec: config.PublishRatePerSec,
+			TestDurationMins:  config.TestDurationMins,
+		},
+		"aggregatedMetrics": map[string]interface{}{
+			"totalMessages":           totalMessages,
+			"successfulPubs":          totalSuccessfulPubs,
+			"failedPubs":              totalFailedPubs,
+			"totalConnections":        totalConnections,
+			"failedConnections":       totalFailedConnections,
+			"testDurationSeconds":     duration.Seconds(),
+			"publicationSuccessRate":  successRate,
+			"connectionSuccessRate":   connectionSuccessRate,
+			"throughputMsgsPerSec":    throughput,
+		},
+		"timestamp": time.Now(),
+	}
+
+	// Marshal to JSON with pretty formatting
+	jsonData, err := json.MarshalIndent(aggregatedResult, "", "  ")
+	if err != nil {
+		return fmt.Errorf("failed to marshal aggregated result to JSON: %v", err)
+	}
+
+	// Write JSON file
+	err = os.WriteFile(filename, jsonData, 0644)
+	if err != nil {
+		return fmt.Errorf("failed to write aggregated JSON file: %v", err)
+	}
+
+	fmt.Printf("Aggregated test results exported to JSON: %s\n", filename)
+	return nil
+}
+
 func main() {
 	// Read broker configuration from brokers.json
 	brokers, err := readBrokers("brokers.json")
@@ -241,23 +332,20 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Printf("Starting MQTT Load Test\n")
+	fmt.Printf("Starting MQTT Distributed Load Test\n")
 	fmt.Printf("Test Code: %s\n", config.TestCode)
 	fmt.Printf("Found %d brokers to test\n", len(brokers))
 	fmt.Printf("Configuration:\n")
-	fmt.Printf("  Total Users: %d\n", config.TotalUsers)
-	fmt.Printf("  Ramp Up Rate: %d users/sec\n", config.RampUpRate)
+	fmt.Printf("  Total Users: %d (will be distributed across all brokers)\n", config.TotalUsers)
+	fmt.Printf("  Ramp Up Rate: %d users/sec per broker\n", config.RampUpRate)
 	fmt.Printf("  QoS: %d\n", config.QoS)
 	fmt.Printf("  Message Size: %d KB\n", config.MessageSizeKB)
 	fmt.Printf("  Publish Rate: %d msgs/sec per user\n", config.PublishRatePerSec)
 	fmt.Printf("  Test Duration: %d minutes\n", config.TestDurationMins)
 	fmt.Println("================================")
 
-	// Run load test for each broker
-	for i, broker := range brokers {
-		fmt.Printf("\n[%d/%d] Testing broker: %s (%s:%d)\n", i+1, len(brokers), broker.Name, broker.Host, broker.Port)
-		runLoadTest(broker, config)
-	}
+	// Distribute users equally across all brokers and run simultaneously
+	runDistributedLoadTest(brokers, config)
 }
 
 // parseConfig reads and validates environment variables
@@ -333,8 +421,135 @@ func generatePayload(sizeKB int) string {
 	return payload
 }
 
-// runLoadTest executes the load test for a single broker
-func runLoadTest(broker Broker, config *LoadTestConfig) {
+// runDistributedLoadTest distributes users equally across all brokers and runs them simultaneously
+func runDistributedLoadTest(brokers []Broker, config *LoadTestConfig) {
+	if len(brokers) == 0 {
+		fmt.Printf("No brokers available for testing\n")
+		return
+	}
+
+	testStartTime := time.Now()
+
+	// Calculate users per broker
+	usersPerBroker := config.TotalUsers / len(brokers)
+	remainingUsers := config.TotalUsers % len(brokers)
+	
+	fmt.Printf("\nDistributing %d users across %d brokers:\n", config.TotalUsers, len(brokers))
+	
+	// Create a slice to hold user distribution
+	userDistribution := make([]int, len(brokers))
+	for i := range userDistribution {
+		userDistribution[i] = usersPerBroker
+		// Distribute remaining users among the first few brokers
+		if i < remainingUsers {
+			userDistribution[i]++
+		}
+		fmt.Printf("  %s: %d users\n", brokers[i].Name, userDistribution[i])
+	}
+
+	// Use WaitGroup to run all broker tests concurrently
+	var wg sync.WaitGroup
+	
+	// Channel to collect results from all brokers
+	resultsChan := make(chan struct {
+		broker Broker
+		metrics *TestMetrics
+		config *LoadTestConfig
+	}, len(brokers))
+
+	// Start load test for each broker concurrently
+	for i, broker := range brokers {
+		if userDistribution[i] == 0 {
+			continue // Skip brokers with no users assigned
+		}
+		
+		wg.Add(1)
+		go func(broker Broker, userCount int, brokerIndex int) {
+			defer wg.Done()
+			
+			fmt.Printf("\nStarting test for broker %s with %d users\n", broker.Name, userCount)
+			
+			// Create a modified config for this broker with the specific user count
+			brokerConfig := *config
+			brokerConfig.TotalUsers = userCount
+			
+			// Run the load test for this broker
+			metrics := runLoadTestForBroker(broker, &brokerConfig)
+			
+			// Send result to channel
+			resultsChan <- struct {
+				broker Broker
+				metrics *TestMetrics
+				config *LoadTestConfig
+			}{broker, metrics, &brokerConfig}
+			
+		}(broker, userDistribution[i], i)
+	}
+
+	// Wait for all broker tests to complete
+	wg.Wait()
+	close(resultsChan)
+	
+	testEndTime := time.Now()
+
+	// Collect and display results for all brokers
+	fmt.Printf("\n\n=== DISTRIBUTED LOAD TEST SUMMARY ===\n")
+	totalSuccessfulPubs := int64(0)
+	totalFailedPubs := int64(0)
+	totalConnections := int64(0)
+	totalFailedConnections := int64(0)
+
+	for result := range resultsChan {
+		fmt.Printf("\nBroker: %s (%d users)\n", result.broker.Name, result.config.TotalUsers)
+		result.metrics.PrintStats()
+		
+		// Export individual broker results
+		if err := result.metrics.ExportToJSON(
+			fmt.Sprintf("%s-%s", config.TestCode, result.broker.Name), 
+			result.broker, 
+			result.config); err != nil {
+			fmt.Printf("Warning: Failed to export JSON for broker %s: %v\n", result.broker.Name, err)
+		}
+		
+		// Aggregate totals
+		totalSuccessfulPubs += result.metrics.SuccessfulPubs
+		totalFailedPubs += result.metrics.FailedPubs
+		totalConnections += result.metrics.TotalConnections
+		totalFailedConnections += result.metrics.FailedConnections
+	}
+
+	// Print aggregated results
+	fmt.Printf("\n=== OVERALL AGGREGATED RESULTS ===\n")
+	totalMessages := totalSuccessfulPubs + totalFailedPubs
+	testDuration := testEndTime.Sub(testStartTime)
+	fmt.Printf("Total Test Duration: %v\n", testDuration)
+	if totalMessages > 0 {
+		overallSuccessRate := float64(totalSuccessfulPubs) / float64(totalMessages) * 100
+		overallThroughput := float64(totalSuccessfulPubs) / testDuration.Seconds()
+		fmt.Printf("Total Messages Sent: %d\n", totalMessages)
+		fmt.Printf("Total Successful Publications: %d\n", totalSuccessfulPubs)
+		fmt.Printf("Total Failed Publications: %d\n", totalFailedPubs)
+		fmt.Printf("Overall Publication Success Rate: %.2f%%\n", overallSuccessRate)
+		fmt.Printf("Overall Throughput: %.2f messages/sec\n", overallThroughput)
+	}
+	if totalConnections > 0 {
+		overallConnectionSuccessRate := float64(totalConnections-totalFailedConnections) / float64(totalConnections) * 100
+		fmt.Printf("Total Connections: %d\n", totalConnections)
+		fmt.Printf("Total Failed Connections: %d\n", totalFailedConnections)
+		fmt.Printf("Overall Connection Success Rate: %.2f%%\n", overallConnectionSuccessRate)
+	}
+	fmt.Printf("======================================\n")
+	
+	// Export aggregated results
+	if err := ExportAggregatedResultsToJSON(config.TestCode, brokers, config, 
+		totalSuccessfulPubs, totalFailedPubs, totalConnections, totalFailedConnections,
+		testStartTime, testEndTime); err != nil {
+		fmt.Printf("Warning: Failed to export aggregated JSON: %v\n", err)
+	}
+}
+
+// runLoadTestForBroker executes the load test for a single broker and returns metrics
+func runLoadTestForBroker(broker Broker, config *LoadTestConfig) *TestMetrics {
 	metrics := &TestMetrics{
 		StartTime:         time.Now(),
 		RequestsPerMinute: make(map[int]int64),
@@ -399,13 +614,8 @@ func runLoadTest(broker Broker, config *LoadTestConfig) {
 	metrics.EndTime = time.Now()
 	metrics.TotalMessages = atomic.LoadInt64(&metrics.SuccessfulPubs) + atomic.LoadInt64(&metrics.FailedPubs)
 
-	// Print results
-	metrics.PrintStats()
-	
-	// Export results to JSON
-	if err := metrics.ExportToJSON(config.TestCode, broker, config); err != nil {
-		fmt.Printf("Warning: Failed to export JSON: %v\n", err)
-	}
+	// Return metrics for aggregation (printing and export handled in distributed function)
+	return metrics
 }
 
 // monitorProgress displays real-time test progress

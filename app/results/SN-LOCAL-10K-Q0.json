@@ -1,0 +1,35 @@
+{
+  "testCode": "SN-LOCAL-10K-Q0",
+  "brokerName": "",
+  "brokerHost": "",
+  "brokerPort": 0,
+  "testConfiguration": {
+    "totalUsers": 10000,
+    "rampUpRate": 1000,
+    "qos": 0,
+    "messageSizeKB": 10,
+    "publishRatePerSec": 1,
+    "testDurationMins": 5
+  },
+  "testMetrics": {
+    "totalMessages": 2990011,
+    "successfulPubs": 2990011,
+    "failedPubs": 0,
+    "totalConnections": 10000,
+    "failedConnections": 0,
+    "testDurationSeconds": 311.853329011,
+    "publicationSuccessRate": 100,
+    "connectionSuccessRate": 100,
+    "throughputMsgsPerSec": 9587.8758436936,
+    "averageRequestsPerMin": 498335.1666666667
+  },
+  "requestsPerMinute": {
+    "1": 536235,
+    "2": 599994,
+    "3": 599999,
+    "4": 600005,
+    "5": 600032,
+    "6": 53746
+  },
+  "timestamp": "2025-09-20T12:36:00.556688337Z"
+}

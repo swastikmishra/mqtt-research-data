@@ -1,7 +1,27 @@
 [
   {
-    "name": "broker",
+    "name": "brokerA",
     "host": "localhost",
     "port": 1883
+  },
+  {
+    "name": "brokerB",
+    "host": "localhost",
+    "port": 1884
+  },
+  {
+    "name": "brokerC",
+    "host": "localhost",
+    "port": 1885
+  },
+  {
+    "name": "brokerD",
+    "host": "localhost",
+    "port": 1886
+  },
+  {
+    "name": "brokerE",
+    "host": "localhost",
+    "port": 1887
   }
 ]

@@ -1,0 +1,35 @@
+{
+  "testCode": "HZ-LOCAL-10K-Q0",
+  "brokerName": "",
+  "brokerHost": "",
+  "brokerPort": 0,
+  "testConfiguration": {
+    "totalUsers": 10000,
+    "rampUpRate": 1000,
+    "qos": 0,
+    "messageSizeKB": 10,
+    "publishRatePerSec": 1,
+    "testDurationMins": 5
+  },
+  "testMetrics": {
+    "totalMessages": 2990015,
+    "successfulPubs": 2990015,
+    "failedPubs": 0,
+    "totalConnections": 10000,
+    "failedConnections": 0,
+    "testDurationSeconds": 311.917373987,
+    "publicationSuccessRate": 100,
+    "connectionSuccessRate": 100,
+    "throughputMsgsPerSec": 9585.920020359676,
+    "averageRequestsPerMin": 498335.8333333333
+  },
+  "requestsPerMinute": {
+    "1": 537937,
+    "2": 600066,
+    "3": 599976,
+    "4": 599986,
+    "5": 600012,
+    "6": 52038
+  },
+  "timestamp": "2025-09-20T12:42:17.801314622Z"
+}
