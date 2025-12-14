@@ -12,12 +12,6 @@ BROKERS_JSON="$1"
 PAYLOAD_KB="$2"
 TEST_NAME="$3"
 
-# Optional sanity checks
-if ! [[ "$BROKER_PORT" =~ ^[0-9]+$ ]]; then
-  echo "Error: broker_port must be a number"
-  exit 1
-fi
-
 if ! [[ "$PAYLOAD_KB" =~ ^[0-9]+$ ]]; then
   echo "Error: payload_kb must be a number"
   exit 1
