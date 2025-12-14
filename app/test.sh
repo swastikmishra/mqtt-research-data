@@ -42,4 +42,3 @@ go build -o loadtest
   --broker-port "${BROKER_PORT}" \
   --payload-kb "${PAYLOAD_KB}" \
   --test-name "${TEST_NAME}"
-
