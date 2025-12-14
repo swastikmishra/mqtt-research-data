@@ -1,17 +1,16 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [[ $# -lt 4 ]]; then
-  echo "Usage: $0 <broker_host> <broker_port> <payload_kb> <test_name>"
+if [[ $# -lt 3 ]]; then
+  echo "Usage: $0 <brokers_json> <payload_kb> <test_name>"
   echo "Example:"
-  echo "  $0 203.0.113.10 1883 10 single-10kb"
+  echo "  $0 brokers.json 10 clustered-10kb"
   exit 1
 fi
 
-BROKER_HOST="$1"
-BROKER_PORT="$2"
-PAYLOAD_KB="$3"
-TEST_NAME="$4"
+BROKERS_JSON="$1"
+PAYLOAD_KB="$2"
+TEST_NAME="$3"
 
 # Optional sanity checks
 if ! [[ "$BROKER_PORT" =~ ^[0-9]+$ ]]; then
@@ -27,7 +26,7 @@ fi
 echo "=============================================="
 echo " Running MQTT Load Test"
 echo "----------------------------------------------"
-echo " Broker:     ${BROKER_HOST}:${BROKER_PORT}"
+echo " Brokers:     ${BROKERS_JSON}"
 echo " Payload:    ${PAYLOAD_KB} KB"
 echo " Test name:  ${TEST_NAME}"
 echo "=============================================="
@@ -38,7 +37,6 @@ go build -o loadtest
 
 # Run test
 ./loadtest \
-  --broker-host "${BROKER_HOST}" \
-  --broker-port "${BROKER_PORT}" \
+  --brokers-json "${BROKERS_JSON}" \
   --payload-kb "${PAYLOAD_KB}" \
   --test-name "${TEST_NAME}"
