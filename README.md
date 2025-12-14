@@ -57,7 +57,7 @@ performance metrics for research and benchmarking purposes.
 docker compose build
 ```
 
-### 2. Run a test
+### 2. Run a test (Single)
 
 ``` bash
 ./test.sh <broker_ip> <broker_port> <payload_kb> <test_name>
@@ -70,6 +70,27 @@ Example:
 ```
 
 All clients will connect directly to the specified broker.
+
+### 3. Run a test (Clustered)
+
+
+``` bash
+./test.sh <brokers_json_file> <payload_kb> <test_name> <duration_secs>
+```
+
+Example (5 mins default):
+
+``` bash
+./test-clustered.sh brokers.json 10 cluster-10kb
+```
+
+
+Example (10 mins):
+
+``` bash
+./test-clustered.sh brokers.json 10 cluster-10kb 600
+```
+
 
 ------------------------------------------------------------------------
 

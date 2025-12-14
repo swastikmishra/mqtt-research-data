@@ -4,7 +4,7 @@ set -euo pipefail
 if [[ $# -lt 4 ]]; then
   echo "Usage: $0 <broker_host> <broker_port> <payload_kb> <test_name>"
   echo "Example:"
-  echo "  $0 203.0.113.10 1883 10 baseline-10kb"
+  echo "  $0 203.0.113.10 1883 10 single-10kb"
   exit 1
 fi
 

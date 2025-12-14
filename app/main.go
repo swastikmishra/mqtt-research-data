@@ -7,6 +7,7 @@ import (
 	"flag"
 	"fmt"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
+	"hash/fnv"
 	"log"
 	"math"
 	"math/rand"
@@ -19,11 +20,20 @@ import (
 	"time"
 )
 
+/* =======================
+   Config & Report Models
+   ======================= */
+
 type Config struct {
+	// Single-broker mode
 	BrokerHost string `json:"broker_host"`
 	BrokerPort int    `json:"broker_port"`
-	TestName   string `json:"test_name"`
-	OutDir     string `json:"out_dir"`
+
+	// Cluster mode (optional): if set, overrides broker-host/broker-port
+	BrokersJSON string `json:"brokers_json,omitempty"`
+
+	TestName string `json:"test_name"`
+	OutDir   string `json:"out_dir"`
 
 	// Load profile
 	RampIntervalSec int `json:"ramp_interval_sec"`
@@ -35,15 +45,18 @@ type Config struct {
 	// Publish profile
 	PubRatePerSec float64 `json:"pub_rate_per_sec_per_publisher"`
 	TopicPrefix   string  `json:"topic_prefix"`
-	TopicCount    int     `json:"topic_count"` // publishers distribute across topics
+	TopicCount    int     `json:"topic_count"`
 
 	// Payload
 	PayloadKB int `json:"payload_kb"`
 
 	// Stop conditions
-	MaxConnFailPct float64 `json:"max_conn_fail_pct"` // per ramp window
+	MaxConnFailPct float64 `json:"max_conn_fail_pct"`
 	MaxDiscPerMin  float64 `json:"max_disconnects_per_min"`
-	MinHoldSteps   int     `json:"min_hold_steps"` // require at least N steps before stop triggers
+	MinHoldSteps   int     `json:"min_hold_steps"`
+
+	// Hard cap on duration
+	MaxDurationSec int `json:"max_duration_sec"`
 }
 
 type Summary struct {
@@ -70,6 +83,25 @@ type Summary struct {
 	LatencyP99Ms float64 `json:"latency_p99_ms"`
 }
 
+/* =======================
+   Cluster broker pool
+   ======================= */
+
+type Broker struct {
+	ID   string `json:"id"`
+	Host string `json:"host"`
+	Port int    `json:"port"`
+}
+
+type BrokersFile struct {
+	Mode    string   `json:"mode,omitempty"`
+	Brokers []Broker `json:"brokers"`
+}
+
+/* =======================
+   Metrics & Latency Histogram
+   ======================= */
+
 type Metrics struct {
 	ConnOK   uint64
 	ConnFail uint64
@@ -82,14 +114,12 @@ type Metrics struct {
 	PubsErr  uint64
 	MsgsRecv uint64
 
-	// latency samples aggregated via histogram
 	LatHist LatencyHist
 }
 
 type LatencyHist struct {
-	// bucket upper bounds in ms
-	edges []float64
-	// counts per bucket (len = len(edges)+1)
+	mu     sync.Mutex
+	edges  []float64
 	counts []uint64
 	total  uint64
 }
@@ -103,6 +133,9 @@ func NewLatencyHist() LatencyHist {
 }
 
 func (h *LatencyHist) Add(ms float64) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+
 	i := 0
 	for i < len(h.edges) && ms > h.edges[i] {
 		i++
@@ -112,6 +145,9 @@ func (h *LatencyHist) Add(ms float64) {
 }
 
 func (h *LatencyHist) Quantile(q float64) float64 {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+
 	if h.total == 0 {
 		return 0
 	}
@@ -123,12 +159,16 @@ func (h *LatencyHist) Quantile(q float64) float64 {
 			if i < len(h.edges) {
 				return h.edges[i]
 			}
-			// overflow bucket: approximate as last edge * 2
+			// overflow bucket approximation
 			return h.edges[len(h.edges)-1] * 2
 		}
 	}
 	return h.edges[len(h.edges)-1] * 2
 }
+
+/* =======================
+   CSV Writer
+   ======================= */
 
 type CSVRow struct {
 	TS string
@@ -165,7 +205,6 @@ func NewCSVWriter(path string) (*CSVWriter, error) {
 	if err != nil {
 		return nil, err
 	}
-	// header
 	_, _ = f.WriteString(strings.Join([]string{
 		"ts", "step",
 		"target_subs", "target_pubs",
@@ -192,13 +231,19 @@ func (w *CSVWriter) WriteRow(r CSVRow) {
 
 func (w *CSVWriter) Close() error { return w.f.Close() }
 
+/* =======================
+   Main
+   ======================= */
+
 func main() {
 	var cfg Config
 
-	flag.StringVar(&cfg.BrokerHost, "broker-host", getenv("BROKER_HOST", "127.0.0.1"), "Broker IP/hostname")
-	flag.IntVar(&cfg.BrokerPort, "broker-port", getenvInt("BROKER_PORT", 1883), "Broker port")
+	flag.StringVar(&cfg.BrokerHost, "broker-host", getenv("BROKER_HOST", "127.0.0.1"), "Broker IP/hostname (single mode)")
+	flag.IntVar(&cfg.BrokerPort, "broker-port", getenvInt("BROKER_PORT", 1883), "Broker port (single mode)")
+	flag.StringVar(&cfg.BrokersJSON, "brokers-json", getenv("BROKERS_JSON", ""), "Path to brokers.json for cluster mode (overrides broker-host/broker-port)")
+
 	flag.StringVar(&cfg.TestName, "test-name", getenv("TEST_NAME", "baseline"), "Test name (used for output filenames)")
-	flag.StringVar(&cfg.OutDir, "out-dir", getenv("OUT_DIR", "/app/results"), "Output directory for JSON/CSV")
+	flag.StringVar(&cfg.OutDir, "out-dir", getenv("OUT_DIR", "./results"), "Output directory for JSON/CSV")
 
 	flag.IntVar(&cfg.RampIntervalSec, "ramp-interval", 10, "Ramp interval in seconds")
 	flag.IntVar(&cfg.RampStepSubs, "ramp-step-subs", 200, "Add this many subscribers per ramp interval")
@@ -212,17 +257,42 @@ func main() {
 	flag.IntVar(&cfg.TopicCount, "topic-count", 10, "Number of topics to spread publishers across")
 
 	flag.IntVar(&cfg.PayloadKB, "payload-kb", 10, "Payload size in KB (default 10). Example: --payload-kb=100")
+
 	flag.Float64Var(&cfg.MaxConnFailPct, "max-conn-fail-pct", 2.0, "Stop if connection fail %% exceeds this within a ramp window")
 	flag.Float64Var(&cfg.MaxDiscPerMin, "max-disc-per-min", 50.0, "Stop if disconnects per minute exceed this")
 	flag.IntVar(&cfg.MinHoldSteps, "min-hold-steps", 3, "Do not stop before this many ramp steps")
+	flag.IntVar(&cfg.MaxDurationSec, "max-duration-sec", 600, "Maximum test duration in seconds (hard stop). Default 600 = 10 minutes")
+
 	flag.Parse()
 
 	if cfg.PayloadKB <= 0 {
 		log.Fatalf("payload-kb must be > 0")
 	}
+	if cfg.TopicCount <= 0 {
+		log.Fatalf("topic-count must be > 0")
+	}
+	if cfg.RampIntervalSec <= 0 {
+		log.Fatalf("ramp-interval must be > 0")
+	}
+	if cfg.MaxDurationSec <= 0 {
+		log.Fatalf("max-duration-sec must be > 0")
+	}
 
 	if err := os.MkdirAll(cfg.OutDir, 0o755); err != nil {
 		log.Fatalf("failed to create out dir: %v", err)
+	}
+
+	// Load cluster broker pool (optional)
+	var brokerPool []Broker
+	if strings.TrimSpace(cfg.BrokersJSON) != "" {
+		bf, err := loadBrokersFile(cfg.BrokersJSON)
+		if err != nil {
+			log.Fatalf("failed to load brokers-json: %v", err)
+		}
+		if len(bf.Brokers) == 0 {
+			log.Fatalf("brokers-json has no brokers")
+		}
+		brokerPool = bf.Brokers
 	}
 
 	csvPath := filepath.Join(cfg.OutDir, cfg.TestName+".csv")
@@ -234,23 +304,28 @@ func main() {
 	}
 	defer func() { _ = csvw.Close() }()
 
-	log.Printf("loadtest: starting test=%s broker=%s:%d payload=%dKB qos=0",
-		cfg.TestName, cfg.BrokerHost, cfg.BrokerPort, cfg.PayloadKB)
+	if len(brokerPool) > 0 {
+		log.Printf("loadtest: starting test=%s mode=cluster brokers=%d payload=%dKB qos=0 max_duration=%ds",
+			cfg.TestName, len(brokerPool), cfg.PayloadKB, cfg.MaxDurationSec)
+	} else {
+		log.Printf("loadtest: starting test=%s mode=single broker=%s:%d payload=%dKB qos=0 max_duration=%ds",
+			cfg.TestName, cfg.BrokerHost, cfg.BrokerPort, cfg.PayloadKB, cfg.MaxDurationSec)
+	}
 
-	ctx, cancel := context.WithCancel(context.Background())
+	baseCtx := context.Background()
+	ctx, cancel := context.WithTimeout(baseCtx, time.Duration(cfg.MaxDurationSec)*time.Second)
 	defer cancel()
 
 	var m Metrics
 	m.LatHist = NewLatencyHist()
 
-	latCh := make(chan float64, 100000) // ms
+	latCh := make(chan float64, 100000) // ms samples
 	go func() {
 		for ms := range latCh {
 			m.LatHist.Add(ms)
 		}
 	}()
 
-	// Keep references so we can stop them
 	var subsMu sync.Mutex
 	var pubsMu sync.Mutex
 	subs := make([]*ClientRunner, 0, cfg.MaxSubs)
@@ -260,7 +335,6 @@ func main() {
 	peakSubs := int64(0)
 	peakPubs := int64(0)
 
-	// per-window counters
 	var prevMsgsRecv uint64
 	var stopReason string
 
@@ -268,11 +342,9 @@ func main() {
 	ticker := time.NewTicker(time.Second)
 	defer ticker.Stop()
 
-	// ramp timer
 	ramp := time.NewTicker(time.Duration(cfg.RampIntervalSec) * time.Second)
 	defer ramp.Stop()
 
-	// snapshot state for per-second CSV
 	targetSubs := 0
 	targetPubs := 0
 
@@ -280,7 +352,7 @@ func main() {
 	var windowConnOK, windowConnFail, windowDisc uint64
 	windowStart := time.Now()
 
-	// drain metrics every second & write CSV
+	// Per-second CSV writer
 	go func() {
 		for {
 			select {
@@ -312,7 +384,7 @@ func main() {
 				p99 := m.LatHist.Quantile(0.99)
 
 				csvw.WriteRow(CSVRow{
-					TS: time.Now().UTC().Format(time.RFC3339),
+					TS:   time.Now().UTC().Format(time.RFC3339),
 					Step: step,
 
 					TargetSubs: targetSubs,
@@ -339,7 +411,7 @@ func main() {
 		}
 	}()
 
-	// main loop: ramp
+	// Main loop: ramp
 	for {
 		select {
 		case <-ctx.Done():
@@ -352,12 +424,10 @@ func main() {
 			curFail := atomic.LoadUint64(&m.ConnFail)
 			curDisc := atomic.LoadUint64(&m.Disc)
 
-			// delta since last window start snapshot
 			dOK := curOK - windowConnOK
 			dFail := curFail - windowConnFail
 			dDisc := curDisc - windowDisc
 
-			// Update baseline markers for next window
 			windowConnOK = curOK
 			windowConnFail = curFail
 			windowDisc = curDisc
@@ -403,7 +473,7 @@ func main() {
 			subsMu.Lock()
 			for len(subs) < targetSubs {
 				id := len(subs)
-				r := NewSubscriber(cfg, id, &m, latCh)
+				r := NewSubscriber(cfg, brokerPool, id, &m, latCh)
 				subs = append(subs, r)
 				go r.Run(ctx)
 			}
@@ -413,7 +483,7 @@ func main() {
 			pubsMu.Lock()
 			for len(pubs) < targetPubs {
 				id := len(pubs)
-				r := NewPublisher(cfg, id, &m)
+				r := NewPublisher(cfg, brokerPool, id, &m)
 				pubs = append(pubs, r)
 				go r.Run(ctx)
 			}
@@ -435,7 +505,11 @@ done:
 	end := time.Now()
 
 	if stopReason == "" {
-		stopReason = "stopped: context cancelled"
+		if ctx.Err() == context.DeadlineExceeded {
+			stopReason = fmt.Sprintf("stop: max_duration_sec=%d reached", cfg.MaxDurationSec)
+		} else {
+			stopReason = "stopped: context cancelled"
+		}
 	}
 
 	s := Summary{
@@ -472,7 +546,9 @@ done:
 	log.Printf("loadtest: %s", stopReason)
 }
 
-// -------------------- Client runners --------------------
+/* =======================
+   Client runners
+   ======================= */
 
 type ClientRunner struct {
 	name string
@@ -481,9 +557,19 @@ type ClientRunner struct {
 
 func (c *ClientRunner) Run(ctx context.Context) { c.run(ctx) }
 
-func mqttOpts(cfg Config, clientID string, onConn func(), onLost func(err error)) *mqtt.ClientOptions {
+func mqttOpts(cfg Config, brokerPool []Broker, clientID string, onConn func(), onLost func(err error)) *mqtt.ClientOptions {
 	opts := mqtt.NewClientOptions()
-	opts.AddBroker(fmt.Sprintf("tcp://%s:%d", cfg.BrokerHost, cfg.BrokerPort))
+
+	host := cfg.BrokerHost
+	port := cfg.BrokerPort
+
+	if len(brokerPool) > 0 {
+		b := pickBrokerDeterministic(brokerPool, clientID)
+		host = b.Host
+		port = b.Port
+	}
+
+	opts.AddBroker(fmt.Sprintf("tcp://%s:%d", host, port))
 	opts.SetClientID(clientID)
 
 	// Keep these minimal & stable for benchmarking
@@ -500,7 +586,7 @@ func mqttOpts(cfg Config, clientID string, onConn func(), onLost func(err error)
 	return opts
 }
 
-func NewSubscriber(cfg Config, id int, m *Metrics, latCh chan<- float64) *ClientRunner {
+func NewSubscriber(cfg Config, brokerPool []Broker, id int, m *Metrics, latCh chan<- float64) *ClientRunner {
 	clientID := fmt.Sprintf("sub-%s-%d-%d", cfg.TestName, os.Getpid(), id)
 	topics := make([]string, cfg.TopicCount)
 	for i := 0; i < cfg.TopicCount; i++ {
@@ -512,7 +598,7 @@ func NewSubscriber(cfg Config, id int, m *Metrics, latCh chan<- float64) *Client
 		run: func(ctx context.Context) {
 			var connected int32
 
-			opts := mqttOpts(cfg, clientID,
+			opts := mqttOpts(cfg, brokerPool, clientID,
 				func() {
 					if atomic.CompareAndSwapInt32(&connected, 0, 1) {
 						atomic.AddInt64(&m.SubsConnected, 1)
@@ -526,13 +612,11 @@ func NewSubscriber(cfg Config, id int, m *Metrics, latCh chan<- float64) *Client
 				},
 			)
 
-			// message handler
 			opts.SetDefaultPublishHandler(func(_ mqtt.Client, msg mqtt.Message) {
 				atomic.AddUint64(&m.MsgsRecv, 1)
 				payload := msg.Payload()
 				if len(payload) >= 16 {
 					tsn := int64(binary.BigEndian.Uint64(payload[0:8]))
-					// seq := binary.BigEndian.Uint64(payload[8:16]) // optional
 					now := time.Now().UnixNano()
 					latMs := float64(now-tsn) / 1e6
 					select {
@@ -545,17 +629,14 @@ func NewSubscriber(cfg Config, id int, m *Metrics, latCh chan<- float64) *Client
 
 			client := mqtt.NewClient(opts)
 
-			// connect
 			if token := client.Connect(); token.Wait() && token.Error() != nil {
 				atomic.AddUint64(&m.ConnFail, 1)
 				return
 			}
 			atomic.AddUint64(&m.ConnOK, 1)
 
-			// subscribe to all topics (QoS0)
 			for _, t := range topics {
 				if token := client.Subscribe(t, 0, nil); token.Wait() && token.Error() != nil {
-					// treat as failure, disconnect
 					atomic.AddUint64(&m.Disc, 1)
 					client.Disconnect(100)
 					if atomic.CompareAndSwapInt32(&connected, 1, 0) {
@@ -565,7 +646,6 @@ func NewSubscriber(cfg Config, id int, m *Metrics, latCh chan<- float64) *Client
 				}
 			}
 
-			// hold
 			<-ctx.Done()
 			client.Disconnect(100)
 			if atomic.CompareAndSwapInt32(&connected, 1, 0) {
@@ -575,16 +655,14 @@ func NewSubscriber(cfg Config, id int, m *Metrics, latCh chan<- float64) *Client
 	}
 }
 
-func NewPublisher(cfg Config, id int, m *Metrics) *ClientRunner {
+func NewPublisher(cfg Config, brokerPool []Broker, id int, m *Metrics) *ClientRunner {
 	clientID := fmt.Sprintf("pub-%s-%d-%d", cfg.TestName, os.Getpid(), id)
 
-	// payload bytes
 	payloadBytes := cfg.PayloadKB * 1024
 	if payloadBytes < 16 {
 		payloadBytes = 16
 	}
 
-	// Choose a stable topic per publisher (spreads load)
 	topicIdx := id % max(1, cfg.TopicCount)
 	topic := fmt.Sprintf("%s/%d", cfg.TopicPrefix, topicIdx)
 
@@ -593,7 +671,7 @@ func NewPublisher(cfg Config, id int, m *Metrics) *ClientRunner {
 		run: func(ctx context.Context) {
 			var connected int32
 
-			opts := mqttOpts(cfg, clientID,
+			opts := mqttOpts(cfg, brokerPool, clientID,
 				func() {
 					if atomic.CompareAndSwapInt32(&connected, 0, 1) {
 						atomic.AddInt64(&m.PubsConnected, 1)
@@ -614,14 +692,11 @@ func NewPublisher(cfg Config, id int, m *Metrics) *ClientRunner {
 			}
 			atomic.AddUint64(&m.ConnOK, 1)
 
-			// Rate limiter
 			interval := time.Duration(float64(time.Second) / math.Max(cfg.PubRatePerSec, 0.000001))
 			t := time.NewTicker(interval)
 			defer t.Stop()
 
-			// pre-allocate payload
 			buf := make([]byte, payloadBytes)
-			// fill with deterministic bytes for stable compression behavior (if any)
 			for i := 16; i < len(buf); i++ {
 				buf[i] = byte('a' + (i % 26))
 			}
@@ -643,7 +718,6 @@ func NewPublisher(cfg Config, id int, m *Metrics) *ClientRunner {
 					binary.BigEndian.PutUint64(buf[8:16], seq)
 
 					token := client.Publish(topic, 0, false, buf)
-					// QoS0 still returns a token; waiting ensures we detect client-side errors
 					token.Wait()
 					if token.Error() != nil {
 						atomic.AddUint64(&m.PubsErr, 1)
@@ -656,7 +730,42 @@ func NewPublisher(cfg Config, id int, m *Metrics) *ClientRunner {
 	}
 }
 
-// -------------------- helpers --------------------
+/* =======================
+   Helpers
+   ======================= */
+
+func loadBrokersFile(path string) (*BrokersFile, error) {
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	var bf BrokersFile
+	if err := json.Unmarshal(b, &bf); err != nil {
+		return nil, err
+	}
+	for i := range bf.Brokers {
+		if strings.TrimSpace(bf.Brokers[i].Host) == "" {
+			return nil, fmt.Errorf("broker[%d] host is empty", i)
+		}
+		if bf.Brokers[i].Port == 0 {
+			bf.Brokers[i].Port = 1883
+		}
+		if strings.TrimSpace(bf.Brokers[i].ID) == "" {
+			bf.Brokers[i].ID = fmt.Sprintf("broker-%d", i)
+		}
+	}
+	return &bf, nil
+}
+
+func pickBrokerDeterministic(brokers []Broker, key string) Broker {
+	if len(brokers) == 1 {
+		return brokers[0]
+	}
+	h := fnv.New32a()
+	_, _ = h.Write([]byte(key))
+	idx := int(h.Sum32()) % len(brokers)
+	return brokers[idx]
+}
 
 func getenv(k, def string) string {
 	v := strings.TrimSpace(os.Getenv(k))
