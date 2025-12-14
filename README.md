@@ -155,7 +155,7 @@ single1
 
 ```bash
 go run main.go \
-  --broker-host=127.0.0.1 --broker-port=1883 \
+  --broker-host=52.66.206.74 --broker-port=1883 \
   --out-dir=./results --test-name=single1 \
   --fixed-subs=100 --fixed-pubs=10 \
   --payload-kb=100 --pub-rate=1 \
@@ -167,7 +167,7 @@ single2
 
 ```bash
 go run main.go \
-  --broker-host=127.0.0.1 --broker-port=1883 \
+  --broker-host=52.66.206.74 --broker-port=1883 \
   --out-dir=./results --test-name=single2 \
   --fixed-subs=100 --fixed-pubs=10 \
   --payload-kb=100 --pub-rate=1 \
@@ -179,7 +179,7 @@ single3
 
 ```bash
 go run main.go \
-  --broker-host=127.0.0.1 --broker-port=1883 \
+  --broker-host=52.66.206.74 --broker-port=1883 \
   --out-dir=./results --test-name=single3 \
   --fixed-subs=100 --fixed-pubs=10 \
   --payload-kb=100 --pub-rate=1 \
@@ -191,7 +191,7 @@ single4
 
 ```bash
 go run main.go \
-  --broker-host=127.0.0.1 --broker-port=1883 \
+  --broker-host=52.66.206.74 --broker-port=1883 \
   --out-dir=./results --test-name=single4 \
   --fixed-subs=250 --fixed-pubs=25 \
   --payload-kb=100 --pub-rate=1 \
@@ -203,7 +203,7 @@ single5
 
 ```bash
 go run main.go \
-  --broker-host=127.0.0.1 --broker-port=1883 \
+  --broker-host=52.66.206.74 --broker-port=1883 \
   --out-dir=./results --test-name=single5 \
   --fixed-subs=250 --fixed-pubs=25 \
   --payload-kb=100 --pub-rate=1 \
@@ -215,7 +215,7 @@ single6
 
 ```bash
 go run main.go \
-  --broker-host=127.0.0.1 --broker-port=1883 \
+  --broker-host=52.66.206.74 --broker-port=1883 \
   --out-dir=./results --test-name=single6 \
   --fixed-subs=250 --fixed-pubs=25 \
   --payload-kb=100 --pub-rate=1 \
@@ -227,7 +227,7 @@ single7
 
 ```bash
 go run main.go \
-  --broker-host=127.0.0.1 --broker-port=1883 \
+  --broker-host=52.66.206.74 --broker-port=1883 \
   --out-dir=./results --test-name=single7 \
   --fixed-subs=500 --fixed-pubs=50 \
   --payload-kb=100 --pub-rate=1 \
@@ -239,7 +239,7 @@ single8
 
 ```bash
 go run main.go \
-  --broker-host=127.0.0.1 --broker-port=1883 \
+  --broker-host=52.66.206.74 --broker-port=1883 \
   --out-dir=./results --test-name=single8 \
   --fixed-subs=500 --fixed-pubs=50 \
   --payload-kb=100 --pub-rate=1 \
@@ -251,7 +251,7 @@ single9
 
 ```bash
 go run main.go \
-  --broker-host=127.0.0.1 --broker-port=1883 \
+  --broker-host=52.66.206.74 --broker-port=1883 \
   --out-dir=./results --test-name=single9 \
   --fixed-subs=500 --fixed-pubs=50 \
   --payload-kb=100 --pub-rate=1 \
