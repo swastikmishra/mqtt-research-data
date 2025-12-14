@@ -131,24 +131,24 @@ Example:
 
 | ID  | Type    | Subs Count | Pubs Count | Payload (KB) | Duration (Seconds) | Test Name |
 | --- | ------- | ---------- | ---------- | ------------ | ------------------ | --------- |
-| 1   | single  | 500        | 10         | 10           | 120                | single1   |
-| 2   | single  | 500        | 10         | 10           | 120                | single2   |
-| 3   | single  | 500        | 10         | 10           | 120                | single3   |
-| 4   | single  | 500        | 10         | 100          | 120                | single4   |
-| 5   | single  | 500        | 10         | 100          | 120                | single5   |
-| 6   | single  | 500        | 10         | 100          | 120                | single6   |
-| 7   | single  | 500        | 10         | 1000         | 120                | single7   |
-| 8   | single  | 500        | 10         | 1000         | 120                | single8   |
-| 9   | single  | 500        | 10         | 1000         | 120                | single9   |
-| 1   | cluster | 500        | 10         | 10           | 120                | cluster1  |
-| 2   | cluster | 500        | 10         | 10           | 120                | cluster2  |
-| 3   | cluster | 500        | 10         | 10           | 120                | cluster3  |
-| 4   | cluster | 500        | 10         | 100          | 120                | cluster4  |
-| 5   | cluster | 500        | 10         | 100          | 120                | cluster5  |
-| 6   | cluster | 500        | 10         | 100          | 120                | cluster6  |
-| 7   | cluster | 500        | 10         | 1000         | 120                | cluster7  |
-| 8   | cluster | 500        | 10         | 1000         | 120                | cluster8  |
-| 9   | cluster | 500        | 10         | 1000         | 120                | cluster9  |
+| 1   | single  | 100        | 10         | 100          | 180                | single1   |
+| 2   | single  | 100        | 10         | 100          | 180                | single2   |
+| 3   | single  | 100        | 10         | 100          | 180                | single3   |
+| 4   | single  | 250        | 25         | 100          | 180                | single4   |
+| 5   | single  | 250        | 25         | 100          | 180                | single5   |
+| 6   | single  | 250        | 25         | 100          | 180                | single6   |
+| 7   | single  | 500        | 50         | 100          | 180                | single7   |
+| 8   | single  | 500        | 50         | 100          | 180                | single8   |
+| 9   | single  | 500        | 50         | 100          | 180                | single9   |
+| 1   | cluster | 500        | 10         | 100          | 180                | cluster1  |
+| 2   | cluster | 500        | 10         | 100          | 180                | cluster2  |
+| 3   | cluster | 500        | 10         | 100          | 180                | cluster3  |
+| 4   | cluster | 1000       | 25         | 100          | 180                | cluster4  |
+| 5   | cluster | 1000       | 25         | 100          | 180                | cluster5  |
+| 6   | cluster | 1000       | 25         | 100          | 180                | cluster6  |
+| 7   | cluster | 2000       | 50         | 100          | 180                | cluster7  |
+| 8   | cluster | 2000       | 50         | 100          | 180                | cluster8  |
+| 9   | cluster | 2000       | 50         | 100          | 180                | cluster9  |
 
 ### Test Commands:
 
@@ -158,10 +158,10 @@ single1
 go run main.go \
   --broker-host=43.205.176.30 --broker-port=1883 \
   --out-dir=./results --test-name=single1 \
-  --fixed-subs=500 --fixed-pubs=10 \
-  --payload-kb=10 --pub-rate=1 \
+  --fixed-subs=100 --fixed-pubs=10 \
+  --payload-kb=100 --pub-rate=1 \
   --topic-count=10 \
-  --max-duration-sec=120 --warmup-sec=10 \
+  --max-duration-sec=180 --warmup-sec=10 \
   --min-connected-sub-pct=90 \
 --min-delivery-ratio-pct=95 \
 --max-p95-latency-ms=3000 \
@@ -174,10 +174,10 @@ single2
 go run main.go \
   --broker-host=43.205.176.30 --broker-port=1883 \
   --out-dir=./results --test-name=single2 \
-  --fixed-subs=500 --fixed-pubs=10 \
-  --payload-kb=10 --pub-rate=1 \
+  --fixed-subs=100 --fixed-pubs=10 \
+  --payload-kb=100 --pub-rate=1 \
   --topic-count=10 \
-  --max-duration-sec=120 --warmup-sec=10 \
+  --max-duration-sec=180 --warmup-sec=10 \
   --min-connected-sub-pct=90 \
 --min-delivery-ratio-pct=95 \
 --max-p95-latency-ms=3000 \
@@ -190,10 +190,10 @@ single3
 go run main.go \
   --broker-host=43.205.176.30 --broker-port=1883 \
   --out-dir=./results --test-name=single3 \
-  --fixed-subs=500 --fixed-pubs=10 \
-  --payload-kb=10 --pub-rate=1 \
+  --fixed-subs=100 --fixed-pubs=10 \
+  --payload-kb=100 --pub-rate=1 \
   --topic-count=10 \
-  --max-duration-sec=120 --warmup-sec=10 \
+  --max-duration-sec=180 --warmup-sec=10 \
   --min-connected-sub-pct=90 \
 --min-delivery-ratio-pct=95 \
 --max-p95-latency-ms=3000 \
@@ -206,10 +206,10 @@ single4
 go run main.go \
   --broker-host=43.205.176.30 --broker-port=1883 \
   --out-dir=./results --test-name=single4 \
-  --fixed-subs=500 --fixed-pubs=10 \
+  --fixed-subs=250 --fixed-pubs=25 \
   --payload-kb=100 --pub-rate=1 \
   --topic-count=10 \
-  --max-duration-sec=120 --warmup-sec=10 \
+  --max-duration-sec=180 --warmup-sec=10 \
   --min-connected-sub-pct=90 \
 --min-delivery-ratio-pct=95 \
 --max-p95-latency-ms=3000 \
@@ -222,10 +222,10 @@ single5
 go run main.go \
   --broker-host=43.205.176.30 --broker-port=1883 \
   --out-dir=./results --test-name=single5 \
-  --fixed-subs=500 --fixed-pubs=10 \
+  --fixed-subs=250 --fixed-pubs=25 \
   --payload-kb=100 --pub-rate=1 \
   --topic-count=10 \
-  --max-duration-sec=120 --warmup-sec=10 \
+  --max-duration-sec=180 --warmup-sec=10 \
   --min-connected-sub-pct=90 \
 --min-delivery-ratio-pct=95 \
 --max-p95-latency-ms=3000 \
@@ -238,10 +238,10 @@ single6
 go run main.go \
   --broker-host=43.205.176.30 --broker-port=1883 \
   --out-dir=./results --test-name=single6 \
-  --fixed-subs=500 --fixed-pubs=10 \
+  --fixed-subs=250 --fixed-pubs=25 \
   --payload-kb=100 --pub-rate=1 \
   --topic-count=10 \
-  --max-duration-sec=120 --warmup-sec=10 \
+  --max-duration-sec=180 --warmup-sec=10 \
   --min-connected-sub-pct=90 \
 --min-delivery-ratio-pct=95 \
 --max-p95-latency-ms=3000 \
@@ -254,10 +254,10 @@ single7
 go run main.go \
   --broker-host=43.205.176.30 --broker-port=1883 \
   --out-dir=./results --test-name=single7 \
-  --fixed-subs=500 --fixed-pubs=10 \
-  --payload-kb=1000 --pub-rate=1 \
+  --fixed-subs=500 --fixed-pubs=50 \
+  --payload-kb=100 --pub-rate=1 \
   --topic-count=10 \
-  --max-duration-sec=120 --warmup-sec=10 \
+  --max-duration-sec=180 --warmup-sec=10 \
   --min-connected-sub-pct=90 \
 --min-delivery-ratio-pct=95 \
 --max-p95-latency-ms=3000 \
@@ -270,10 +270,10 @@ single8
 go run main.go \
   --broker-host=43.205.176.30 --broker-port=1883 \
   --out-dir=./results --test-name=single8 \
-  --fixed-subs=500 --fixed-pubs=10 \
-  --payload-kb=1000 --pub-rate=1 \
+  --fixed-subs=500 --fixed-pubs=50 \
+  --payload-kb=100 --pub-rate=1 \
   --topic-count=10 \
-  --max-duration-sec=120 --warmup-sec=10 \
+  --max-duration-sec=180 --warmup-sec=10 \
   --min-connected-sub-pct=90 \
 --min-delivery-ratio-pct=95 \
 --max-p95-latency-ms=3000 \
@@ -286,10 +286,10 @@ single9
 go run main.go \
   --broker-host=43.205.176.30 --broker-port=1883 \
   --out-dir=./results --test-name=single9 \
-  --fixed-subs=500 --fixed-pubs=10 \
-  --payload-kb=1000 --pub-rate=1 \
+  --fixed-subs=500 --fixed-pubs=50 \
+  --payload-kb=100 --pub-rate=1 \
   --topic-count=10 \
-  --max-duration-sec=120 --warmup-sec=10 \
+  --max-duration-sec=180 --warmup-sec=10 \
   --min-connected-sub-pct=90 \
 --min-delivery-ratio-pct=95 \
 --max-p95-latency-ms=3000 \
@@ -303,9 +303,9 @@ go run main.go \
   --brokers-json=./brokers.json \
   --out-dir=./results --test-name=cluster1 \
   --fixed-subs=500 --fixed-pubs=10 \
-  --payload-kb=10 --pub-rate=1 \
+  --payload-kb=100 --pub-rate=1 \
   --topic-count=10 \
-  --max-duration-sec=120 --warmup-sec=10 \
+  --max-duration-sec=180 --warmup-sec=10 \
   --min-connected-sub-pct=90 \
 --min-delivery-ratio-pct=95 \
 --max-p95-latency-ms=3000 \
@@ -319,9 +319,9 @@ go run main.go \
   --brokers-json=./brokers.json \
   --out-dir=./results --test-name=cluster2 \
   --fixed-subs=500 --fixed-pubs=10 \
-  --payload-kb=10 --pub-rate=1 \
+  --payload-kb=100 --pub-rate=1 \
   --topic-count=10 \
-  --max-duration-sec=120 --warmup-sec=10 \
+  --max-duration-sec=180 --warmup-sec=10 \
   --min-connected-sub-pct=90 \
 --min-delivery-ratio-pct=95 \
 --max-p95-latency-ms=3000 \
@@ -335,9 +335,9 @@ go run main.go \
   --brokers-json=./brokers.json \
   --out-dir=./results --test-name=cluster3 \
   --fixed-subs=500 --fixed-pubs=10 \
-  --payload-kb=10 --pub-rate=1 \
+  --payload-kb=100 --pub-rate=1 \
   --topic-count=10 \
-  --max-duration-sec=120 --warmup-sec=10 \
+  --max-duration-sec=180 --warmup-sec=10 \
   --min-connected-sub-pct=90 \
 --min-delivery-ratio-pct=95 \
 --max-p95-latency-ms=3000 \
@@ -350,10 +350,10 @@ cluster4
 go run main.go \
   --brokers-json=./brokers.json \
   --out-dir=./results --test-name=cluster4 \
-  --fixed-subs=500 --fixed-pubs=10 \
+  --fixed-subs=1000 --fixed-pubs=25 \
   --payload-kb=100 --pub-rate=1 \
   --topic-count=10 \
-  --max-duration-sec=120 --warmup-sec=10 \
+  --max-duration-sec=180 --warmup-sec=10 \
   --min-connected-sub-pct=90 \
 --min-delivery-ratio-pct=95 \
 --max-p95-latency-ms=3000 \
@@ -366,10 +366,10 @@ cluster5
 go run main.go \
   --brokers-json=./brokers.json \
   --out-dir=./results --test-name=cluster5 \
-  --fixed-subs=500 --fixed-pubs=10 \
+  --fixed-subs=1000 --fixed-pubs=25 \
   --payload-kb=100 --pub-rate=1 \
   --topic-count=10 \
-  --max-duration-sec=120 --warmup-sec=10 \
+  --max-duration-sec=180 --warmup-sec=10 \
   --min-connected-sub-pct=90 \
 --min-delivery-ratio-pct=95 \
 --max-p95-latency-ms=3000 \
@@ -382,10 +382,10 @@ cluster6
 go run main.go \
   --brokers-json=./brokers.json \
   --out-dir=./results --test-name=cluster6 \
-  --fixed-subs=500 --fixed-pubs=10 \
+  --fixed-subs=1000 --fixed-pubs=25 \
   --payload-kb=100 --pub-rate=1 \
   --topic-count=10 \
-  --max-duration-sec=120 --warmup-sec=10 \
+  --max-duration-sec=180 --warmup-sec=10 \
   --min-connected-sub-pct=90 \
 --min-delivery-ratio-pct=95 \
 --max-p95-latency-ms=3000 \
@@ -398,10 +398,10 @@ cluster7
 go run main.go \
   --brokers-json=./brokers.json \
   --out-dir=./results --test-name=cluster7 \
-  --fixed-subs=500 --fixed-pubs=10 \
-  --payload-kb=1000 --pub-rate=1 \
+  --fixed-subs=2000 --fixed-pubs=50 \
+  --payload-kb=100 --pub-rate=1 \
   --topic-count=10 \
-  --max-duration-sec=120 --warmup-sec=10 \
+  --max-duration-sec=180 --warmup-sec=10 \
   --min-connected-sub-pct=90 \
 --min-delivery-ratio-pct=95 \
 --max-p95-latency-ms=3000 \
@@ -414,10 +414,10 @@ cluster8
 go run main.go \
   --brokers-json=./brokers.json \
   --out-dir=./results --test-name=cluster8 \
-  --fixed-subs=500 --fixed-pubs=10 \
-  --payload-kb=1000 --pub-rate=1 \
+  --fixed-subs=2000 --fixed-pubs=50 \
+  --payload-kb=100 --pub-rate=1 \
   --topic-count=10 \
-  --max-duration-sec=120 --warmup-sec=10 \
+  --max-duration-sec=180 --warmup-sec=10 \
   --min-connected-sub-pct=90 \
 --min-delivery-ratio-pct=95 \
 --max-p95-latency-ms=3000 \
@@ -430,10 +430,10 @@ cluster9
 go run main.go \
   --brokers-json=./brokers.json \
   --out-dir=./results --test-name=cluster9 \
-  --fixed-subs=500 --fixed-pubs=10 \
-  --payload-kb=1000 --pub-rate=1 \
+  --fixed-subs=2000 --fixed-pubs=50 \
+  --payload-kb=100 --pub-rate=1 \
   --topic-count=10 \
-  --max-duration-sec=120 --warmup-sec=10 \
+  --max-duration-sec=180 --warmup-sec=10 \
   --min-connected-sub-pct=90 \
 --min-delivery-ratio-pct=95 \
 --max-p95-latency-ms=3000 \
