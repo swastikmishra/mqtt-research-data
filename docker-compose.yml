@@ -5,16 +5,7 @@ services:
     container_name: mqtt-loadtest
     network_mode: host
     volumes:
-      - ./results:/app/results
-    environment:
-      # Optional defaults; can be overridden in CLI args
-      BROKER_HOST: "127.0.0.1"
-      BROKER_PORT: "1883"
-      TEST_NAME: "baseline"
-    command:
-      [
-        "--broker-host", "${BROKER_HOST}",
-        "--broker-port", "${BROKER_PORT}",
-        "--test-name", "${TEST_NAME}",
-        "--out-dir", "/app/results"
-      ]
+      - ./app:/app
+    tty: true
+    stdin_open: true
+    

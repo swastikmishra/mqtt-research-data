@@ -1,17 +1,17 @@
-FROM golang:1.18-bullseye AS build
-WORKDIR /src
+FROM ubuntu:22.04
 
-COPY go.mod go.sum ./
-RUN go mod download
-
-COPY . .
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /out/loadtest ./cmd/loadtest
-
-FROM debian:bullseye-slim
+ENV DEBIAN_FRONTEND=noninteractive
 WORKDIR /app
-COPY --from=build /out/loadtest /app/loadtest
 
-# Write outputs here (we'll mount a volume)
-RUN mkdir -p /app/results
+# Build + runtime deps for Mosquitto + plugin build + Go sidecar build
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates git build-essential cmake pkg-config \
+    libssl-dev \
+    libcjson-dev \
+    uuid-dev \
+    libhiredis-dev \
+    # Go toolchain (Ubuntu 22.04 provides Go 1.18.x)
+    golang-go \
+    && rm -rf /var/lib/apt/lists/*
 
-ENTRYPOINT ["/app/loadtest"]
+CMD ["bash"]
