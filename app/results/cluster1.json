@@ -26,9 +26,9 @@
     "consecutive_sla_breaches": 20,
     "max_duration_sec": 120
   },
-  "started_at": "2025-12-14T14:47:36.776968219Z",
-  "finished_at": "2025-12-14T14:49:36.775202119Z",
-  "duration_sec": 119.998233889,
+  "started_at": "2025-12-14T15:25:27.226426312Z",
+  "finished_at": "2025-12-14T15:27:27.224842781Z",
+  "duration_sec": 119.998416456,
   "peak_connected_subscribers": 500,
   "peak_connected_publishers": 10,
   "stop_reason": "stop: max_duration_sec=120 reached",
@@ -48,10 +48,10 @@
   "total_reordered_deliveries": 0,
   "overall_delivery_ratio": 1.0084745762711864,
   "latency_p50_ms": 125,
-  "latency_p95_ms": 250,
+  "latency_p95_ms": 175,
   "latency_p99_ms": 250,
-  "latency_mean_ms": 121.70393371784652,
-  "latency_std_ms": 73.17853574566745,
-  "latency_min_ms": 1.453341,
-  "latency_max_ms": 779.641158
+  "latency_mean_ms": 117.07280311868216,
+  "latency_std_ms": 57.69425607744704,
+  "latency_min_ms": 1.086837,
+  "latency_max_ms": 336.454337
 }

@@ -25,9 +25,9 @@
     "consecutive_sla_breaches": 20,
     "max_duration_sec": 120
   },
-  "started_at": "2025-12-14T14:44:54.039584293Z",
-  "finished_at": "2025-12-14T14:46:54.038071926Z",
-  "duration_sec": 119.998487632,
+  "started_at": "2025-12-14T15:22:55.207766797Z",
+  "finished_at": "2025-12-14T15:24:55.206902496Z",
+  "duration_sec": 119.999135681,
   "peak_connected_subscribers": 500,
   "peak_connected_publishers": 10,
   "stop_reason": "stop: max_duration_sec=120 reached",
@@ -49,8 +49,8 @@
   "latency_p50_ms": 125,
   "latency_p95_ms": 250,
   "latency_p99_ms": 250,
-  "latency_mean_ms": 121.27245610714209,
-  "latency_std_ms": 64.31585638441881,
-  "latency_min_ms": 0.419316,
-  "latency_max_ms": 375.547198
+  "latency_mean_ms": 124.74240800415168,
+  "latency_std_ms": 73.91533350479875,
+  "latency_min_ms": 0.527521,
+  "latency_max_ms": 717.205037
 }
