@@ -134,8 +134,8 @@ Example:
 | ID  | Test Name            | Subs  | Pubs | Payload | Rate (per Pub) | Total Tput  | Duration | Test Goal                                                                  |
 | --- | -------------------- | ----- | ---- | ------- | -------------- | ----------- | -------- | -------------------------------------------------------------------------- |
 | S1  | single_latency_base  | 100   | 1    | 1 KB    | 10             | 10 msg/s    | 180s     | Baseline Latency. Minimal load to find "best case" response time.          |
-| S2  | single_cpu_stress    | 500   | 50   | 1 KB   | 50             | 2,500 msg/s | 180s     | High Throughput (CPU). High interrupt rate with small packets.             |
-| S3  | single_fanout_stress | 1,000 | 10   | 1 KB   | 100            | 1,000 msg/s | 180s     | Fan-Out Logic. High fan-out (1 pub → 1000 subs) to test dispatch speed.    |
+| S2  | single_cpu_stress    | 500   | 50   | 1 KB    | 50             | 2,500 msg/s | 180s     | High Throughput (CPU). High interrupt rate with small packets.             |
+| S3  | single_fanout_stress | 1,000 | 10   | 1 KB    | 100            | 1,000 msg/s | 180s     | Fan-Out Logic. High fan-out (1 pub → 1000 subs) to test dispatch speed.    |
 | S4  | single_conn_max      | 5,000 | 1    | 1 KB    | 1              | 1 msg/s     | 300s     | Max Connections (RAM). Idle connection holding capacity (Longer duration). |
 | S5  | single_bw_limit      | 200   | 10   | 50 KB   | 5              | 50 msg/s    | 180s     | Bandwidth Saturation. Tests network I/O limits (~25MB/s ingress).          |
 
@@ -144,8 +144,8 @@ Example:
 | ID  | Test Name             | Subs  | Pubs | Payload | Rate (per Pub) | Total Tput  | Duration | Test Goal                                                                        |
 | --- | --------------------- | ----- | ---- | ------- | -------------- | ----------- | -------- | -------------------------------------------------------------------------------- |
 | C1  | cluster_latency_base  | 100   | 1    | 1 KB    | 10             | 10 msg/s    | 180s     | Cluster Tax. Compare vs S1 to see overhead of cluster hops.                      |
-| C2  | cluster_cpu_stress    | 500   | 50   | 1 KB   | 50             | 2,500 msg/s | 180s     | CPU & Sync. High packet rate stresses internal cluster state sync.               |
-| C3  | cluster_fanout_stress | 1,000 | 10   | 1 KB   | 100            | 1,000 msg/s | 180s     | Routing Efficiency. Tests if messages reach subs on different nodes efficiently. |
+| C2  | cluster_cpu_stress    | 500   | 50   | 1 KB    | 50             | 2,500 msg/s | 180s     | CPU & Sync. High packet rate stresses internal cluster state sync.               |
+| C3  | cluster_fanout_stress | 1,000 | 10   | 1 KB    | 100            | 1,000 msg/s | 180s     | Routing Efficiency. Tests if messages reach subs on different nodes efficiently. |
 | C4  | cluster_conn_max      | 5,000 | 1    | 1 KB    | 1              | 1 msg/s     | 300s     | Distributed RAM. Can the cluster hold more idle conns than Single?               |
 | C5  | cluster_bw_limit      | 200   | 10   | 50 KB   | 5              | 50 msg/s    | 180s     | Network Dist. Does splitting traffic across nodes increase total BW capacity?    |
 
@@ -217,7 +217,6 @@ go run main.go \
   --topic-count=10 \
   --min-connected-sub-pct=90 --min-delivery-ratio-pct=95 --max-p95-latency-ms=2000
 ```
-
 
 #### Cluster Node Commands
 
