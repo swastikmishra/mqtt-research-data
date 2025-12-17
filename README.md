@@ -129,109 +129,159 @@ Example:
 
 ## Tests
 
-| ID  | Type    | Subs Count | Pubs Count | Payload (KB) | Duration (Seconds) | Test Name |
-| --- | ------- | ---------- | ---------- | ------------ | ------------------ | --------- |
-| 1   | single  | 100        | 10         | 100          | 180                | single1   |
-| 2   | single  | 300        | 20         | 100          | 180                | single2   |
-| 3   | single  | 600        | 30         | 100          | 180                | single3   |
-| 4   | cluster | 100        | 10         | 100          | 180                | cluster1  |
-| 5   | cluster | 300        | 20         | 100          | 180                | cluster2  |
-| 6   | cluster | 600        | 30         | 100          | 180                | cluster3  |
+#### Set 1: Single Node Scenarios
+
+| ID  | Test Name            | Subs  | Pubs | Payload | Rate (per Pub) | Total Tput  | Duration | Test Goal                                                                  |
+| --- | -------------------- | ----- | ---- | ------- | -------------- | ----------- | -------- | -------------------------------------------------------------------------- |
+| S1  | single_latency_base  | 100   | 1    | 1 KB    | 10             | 10 msg/s    | 180s     | Baseline Latency. Minimal load to find "best case" response time.          |
+| S2  | single_cpu_stress    | 500   | 50   | 100 B   | 50             | 2,500 msg/s | 180s     | High Throughput (CPU). High interrupt rate with small packets.             |
+| S3  | single_fanout_stress | 1,000 | 10   | 100 B   | 100            | 1,000 msg/s | 180s     | Fan-Out Logic. High fan-out (1 pub → 1000 subs) to test dispatch speed.    |
+| S4  | single_conn_max      | 5,000 | 1    | 1 KB    | 1              | 1 msg/s     | 300s     | Max Connections (RAM). Idle connection holding capacity (Longer duration). |
+| S5  | single_bw_limit      | 200   | 10   | 50 KB   | 5              | 50 msg/s    | 180s     | Bandwidth Saturation. Tests network I/O limits (~25MB/s ingress).          |
+
+#### Set 2: Clustered Node Scenarios
+
+| ID  | Test Name             | Subs  | Pubs | Payload | Rate (per Pub) | Total Tput  | Duration | Test Goal                                                                        |
+| --- | --------------------- | ----- | ---- | ------- | -------------- | ----------- | -------- | -------------------------------------------------------------------------------- |
+| C1  | cluster_latency_base  | 100   | 1    | 1 KB    | 10             | 10 msg/s    | 180s     | Cluster Tax. Compare vs S1 to see overhead of cluster hops.                      |
+| C2  | cluster_cpu_stress    | 500   | 50   | 100 B   | 50             | 2,500 msg/s | 180s     | CPU & Sync. High packet rate stresses internal cluster state sync.               |
+| C3  | cluster_fanout_stress | 1,000 | 10   | 100 B   | 100            | 1,000 msg/s | 180s     | Routing Efficiency. Tests if messages reach subs on different nodes efficiently. |
+| C4  | cluster_conn_max      | 5,000 | 1    | 1 KB    | 1              | 1 msg/s     | 300s     | Distributed RAM. Can the cluster hold more idle conns than Single?               |
+| C5  | cluster_bw_limit      | 200   | 10   | 50 KB   | 5              | 50 msg/s    | 180s     | Network Dist. Does splitting traffic across nodes increase total BW capacity?    |
 
 ### Test Commands:
 
-single1
+#### Single Node Commands
+
+**S1: Baseline Latency**
 
 ```bash
 go run main.go \
   --broker-host=43.205.176.30 --broker-port=1883 \
-  --out-dir=./results --test-name=single1 \
-  --fixed-subs=100 --fixed-pubs=10 \
-  --payload-kb=100 --pub-rate=1 \
-  --topic-count=10 \
+  --out-dir=./results --test-name=single_latency_base \
+  --fixed-subs=100 --fixed-pubs=1 \
+  --payload-kb=1 --pub-rate=10 \
   --max-duration-sec=180 --warmup-sec=10 \
-  --min-connected-sub-pct=90 \
---min-delivery-ratio-pct=95 \
---max-p95-latency-ms=3000 \
---consecutive-sla-breaches=20
+  --topic-count=10 \
+  --min-connected-sub-pct=90 --min-delivery-ratio-pct=99 --max-p95-latency-ms=200
 ```
 
-single2
+**S2: CPU Stress (High Packet Rate)**
 
 ```bash
 go run main.go \
   --broker-host=43.205.176.30 --broker-port=1883 \
-  --out-dir=./results --test-name=single2 \
-  --fixed-subs=300 --fixed-pubs=20 \
-  --payload-kb=100 --pub-rate=1 \
-  --topic-count=10 \
+  --out-dir=./results --test-name=single_cpu_stress \
+  --fixed-subs=500 --fixed-pubs=50 \
+  --payload-kb=0.1 --pub-rate=50 \
   --max-duration-sec=180 --warmup-sec=10 \
-  --min-connected-sub-pct=90 \
---min-delivery-ratio-pct=95 \
---max-p95-latency-ms=3000 \
---consecutive-sla-breaches=20
+  --topic-count=10 \
+  --min-connected-sub-pct=90 --min-delivery-ratio-pct=95 --max-p95-latency-ms=1000
 ```
 
-single3
+**S3: Fan-Out Stress**
 
 ```bash
 go run main.go \
   --broker-host=43.205.176.30 --broker-port=1883 \
-  --out-dir=./results --test-name=single3 \
-  --fixed-subs=600 --fixed-pubs=30 \
-  --payload-kb=100 --pub-rate=1 \
-  --topic-count=10 \
+  --out-dir=./results --test-name=single_fanout_stress \
+  --fixed-subs=1000 --fixed-pubs=10 \
+  --payload-kb=0.1 --pub-rate=100 \
   --max-duration-sec=180 --warmup-sec=10 \
-  --min-connected-sub-pct=90 \
---min-delivery-ratio-pct=95 \
---max-p95-latency-ms=3000 \
---consecutive-sla-breaches=20
+  --topic-count=10 \
+  --min-connected-sub-pct=90 --min-delivery-ratio-pct=95 --max-p95-latency-ms=2000
 ```
 
-cluster1
+**S4: Max Connections (RAM)**
+
+```bash
+go run main.go \
+  --broker-host=43.205.176.30 --broker-port=1883 \
+  --out-dir=./results --test-name=single_conn_max \
+  --fixed-subs=5000 --fixed-pubs=1 \
+  --payload-kb=1 --pub-rate=1 \
+  --max-duration-sec=300 --warmup-sec=20 \
+  --topic-count=10 \
+  --min-connected-sub-pct=95 --min-delivery-ratio-pct=99 --max-p95-latency-ms=5000
+```
+
+**S5: Bandwidth Limit**
+
+```bash
+go run main.go \
+  --broker-host=43.205.176.30 --broker-port=1883 \
+  --out-dir=./results --test-name=single_bw_limit \
+  --fixed-subs=200 --fixed-pubs=10 \
+  --payload-kb=50 --pub-rate=5 \
+  --max-duration-sec=180 --warmup-sec=10 \
+  --topic-count=10 \
+  --min-connected-sub-pct=90 --min-delivery-ratio-pct=95 --max-p95-latency-ms=2000
+```
+
+
+#### Cluster Node Commands
+
+**C1: Baseline Latency**
 
 ```bash
 go run main.go \
   --brokers-json=./brokers.json \
-  --out-dir=./results --test-name=cluster1 \
-  --fixed-subs=100 --fixed-pubs=10 \
-  --payload-kb=100 --pub-rate=1 \
-  --topic-count=10 \
+  --out-dir=./results --test-name=cluster_latency_base \
+  --fixed-subs=100 --fixed-pubs=1 \
+  --payload-kb=1 --pub-rate=10 \
   --max-duration-sec=180 --warmup-sec=10 \
-  --min-connected-sub-pct=90 \
---min-delivery-ratio-pct=95 \
---max-p95-latency-ms=3000 \
---consecutive-sla-breaches=20
+  --topic-count=10 \
+  --min-connected-sub-pct=90 --min-delivery-ratio-pct=99 --max-p95-latency-ms=200
 ```
 
-cluster2
+**C2: CPU Stress (High Packet Rate)**
 
 ```bash
 go run main.go \
   --brokers-json=./brokers.json \
-  --out-dir=./results --test-name=cluster2 \
-  --fixed-subs=300 --fixed-pubs=20 \
-  --payload-kb=100 --pub-rate=1 \
-  --topic-count=10 \
+  --out-dir=./results --test-name=cluster_cpu_stress \
+  --fixed-subs=500 --fixed-pubs=50 \
+  --payload-kb=0.1 --pub-rate=50 \
   --max-duration-sec=180 --warmup-sec=10 \
-  --min-connected-sub-pct=90 \
---min-delivery-ratio-pct=95 \
---max-p95-latency-ms=3000 \
---consecutive-sla-breaches=20
+  --topic-count=10 \
+  --min-connected-sub-pct=90 --min-delivery-ratio-pct=95 --max-p95-latency-ms=1000
 ```
 
-cluster3
+**C3: Fan-Out Stress**
 
 ```bash
 go run main.go \
   --brokers-json=./brokers.json \
-  --out-dir=./results --test-name=cluster3 \
-  --fixed-subs=600 --fixed-pubs=30 \
-  --payload-kb=100 --pub-rate=1 \
-  --topic-count=10 \
+  --out-dir=./results --test-name=cluster_fanout_stress \
+  --fixed-subs=1000 --fixed-pubs=10 \
+  --payload-kb=0.1 --pub-rate=100 \
   --max-duration-sec=180 --warmup-sec=10 \
-  --min-connected-sub-pct=90 \
---min-delivery-ratio-pct=95 \
---max-p95-latency-ms=3000 \
---consecutive-sla-breaches=20
+  --topic-count=10 \
+  --min-connected-sub-pct=90 --min-delivery-ratio-pct=95 --max-p95-latency-ms=2000
+```
+
+**C4: Max Connections (RAM)**
+
+```bash
+go run main.go \
+  --brokers-json=./brokers.json \
+  --out-dir=./results --test-name=cluster_conn_max \
+  --fixed-subs=5000 --fixed-pubs=1 \
+  --payload-kb=1 --pub-rate=1 \
+  --max-duration-sec=300 --warmup-sec=20 \
+  --topic-count=10 \
+  --min-connected-sub-pct=95 --min-delivery-ratio-pct=99 --max-p95-latency-ms=5000
+```
+
+**C5: Bandwidth Limit**
+
+```bash
+go run main.go \
+  --brokers-json=./brokers.json \
+  --out-dir=./results --test-name=cluster_bw_limit \
+  --fixed-subs=200 --fixed-pubs=10 \
+  --payload-kb=50 --pub-rate=5 \
+  --max-duration-sec=180 --warmup-sec=10 \
+  --topic-count=10 \
+  --min-connected-sub-pct=90 --min-delivery-ratio-pct=95 --max-p95-latency-ms=2000
 ```
