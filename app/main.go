@@ -26,10 +26,13 @@ import (
 
 type Config struct {
 	// Broker Connection
-	BrokerHost      string
-	BrokerPort      int
-	BrokersJSON     string
-	ClusterHotAdd   bool
+	BrokerHost    string
+	BrokerPort    int
+	BrokersJSON   string
+	ClusterHotAdd bool
+
+	// New Flag
+	MaxClientsPerBroker int
 
 	// Test Definition
 	OutDir       string
@@ -66,6 +69,7 @@ func init() {
 	flag.IntVar(&cfg.BrokerPort, "broker-port", 1883, "Single broker port")
 	flag.StringVar(&cfg.BrokersJSON, "brokers-json", "", "Path to brokers.json")
 	flag.BoolVar(&cfg.ClusterHotAdd, "cluster-hot-add-new-clients", false, "Hot-add brokers on scaling")
+	flag.IntVar(&cfg.MaxClientsPerBroker, "max-client-per-broker", 0, "Max clients per broker before forcing switch (0 = disabled)")
 
 	// Test Params
 	flag.StringVar(&cfg.OutDir, "out-dir", "./results", "Output directory")
@@ -100,7 +104,7 @@ type GlobalStats struct {
 	MsgsSent      uint64
 	MsgsRecv      uint64
 	Disconnects   uint64
-	
+
 	// Latency Tracking (Protected by Mutex for simplicity in this window approach)
 	latencies []int64
 	mu        sync.Mutex
@@ -139,6 +143,7 @@ var stats GlobalStats
 type BrokerManager struct {
 	Brokers       []string
 	ActiveIndex   int
+	CurrentCount  int // Track clients on current broker
 	HotAddEnabled bool
 }
 
@@ -155,6 +160,7 @@ func (bm *BrokerManager) ActivateNextBroker() bool {
 	}
 	if bm.ActiveIndex < len(bm.Brokers)-1 {
 		bm.ActiveIndex++
+		bm.CurrentCount = 0 // Reset count for the new node
 		log.Printf(">>> [CLUSTER] Hot Adding Broker #%d: %s", bm.ActiveIndex+1, bm.Brokers[bm.ActiveIndex])
 		return true
 	}
@@ -172,7 +178,7 @@ func main() {
 	if err := os.MkdirAll(cfg.OutDir, 0755); err != nil {
 		log.Fatal(err)
 	}
-	
+
 	// 2. Load Brokers
 	var brokers []string
 	if cfg.BrokersJSON != "" {
@@ -194,12 +200,16 @@ func main() {
 	bm := &BrokerManager{
 		Brokers:       brokers,
 		ActiveIndex:   0,
+		CurrentCount:  0,
 		HotAddEnabled: cfg.ClusterHotAdd,
 	}
 
 	log.Printf("Starting Test: %s", cfg.TestName)
 	log.Printf("Brokers: %v (HotAdd: %v)", brokers, cfg.ClusterHotAdd)
-	log.Printf("SLA: Conn>%.1f%% Del>%.1f%% P95<%dms Disc<%d", 
+	if cfg.MaxClientsPerBroker > 0 {
+		log.Printf("Load Strategy: Max %d clients per broker", cfg.MaxClientsPerBroker)
+	}
+	log.Printf("SLA: Conn>%.1f%% Del>%.1f%% P95<%dms Disc<%d",
 		cfg.SlaMinConnPct, cfg.SlaMinDeliveryPct, cfg.SlaMaxP95Ms, cfg.SlaMaxDiscPerMin)
 
 	// 3. Setup CSV
@@ -220,14 +230,14 @@ func main() {
 	// 5. Subscriber Step Loop
 	currentSubs := 0
 	consecutiveBreaches := 0
-	
+
 	// Signal handling
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
 
 	// Main Test Loop
 	for targetSubs := cfg.InitialSubs; targetSubs <= cfg.MaxSubs; targetSubs += cfg.SubStep {
-		
+
 		// Check for user abort
 		select {
 		case <-sigCh:
@@ -238,9 +248,45 @@ func main() {
 
 		// A. RAMP UP
 		needed := targetSubs - currentSubs
-		log.Printf("--- STEP: Scaling to %d (Adding %d to %s) ---", targetSubs, needed, bm.GetCurrentTarget())
-		
-		spawnSubscribers(needed, currentSubs, bm) // currentSubs is offset for ID generation
+		log.Printf("--- STEP: Scaling to %d (Adding %d) ---", targetSubs, needed)
+
+		// Loop to handle split batches if we hit MaxClientsPerBroker mid-step
+		addedSoFar := 0
+		offset := currentSubs
+
+		for addedSoFar < needed {
+			// 1. Check Capacity Limit
+			if cfg.MaxClientsPerBroker > 0 && bm.CurrentCount >= cfg.MaxClientsPerBroker {
+				// We are full, switch now
+				if bm.ActivateNextBroker() {
+					log.Printf("Capacity Reached. Switched to next broker.")
+				} else {
+					// No more brokers, must overflow
+					if addedSoFar == 0 { // Just logging once per step logic
+						log.Printf("Capacity Reached but no more brokers available. Overflowing current.")
+					}
+				}
+			}
+
+			// 2. Calculate Chunk Size
+			chunk := needed - addedSoFar
+			if cfg.MaxClientsPerBroker > 0 {
+				space := cfg.MaxClientsPerBroker - bm.CurrentCount
+				// If we have space, but it is smaller than needed, split the batch
+				if space > 0 && space < chunk {
+					chunk = space
+				}
+			}
+
+			// 3. Spawn Chunk
+			// Note: spawnSubscribers uses bm.GetCurrentTarget(), which changes if ActivateNextBroker was called
+			spawnSubscribers(chunk, offset, bm)
+			
+			bm.CurrentCount += chunk
+			offset += chunk
+			addedSoFar += chunk
+		}
+
 		currentSubs = targetSubs
 
 		// B. WARMUP
@@ -254,18 +300,10 @@ func main() {
 
 		// D. SLA CHECK
 		connPct := (float64(atomic.LoadInt64(&stats.ConnectedSubs)) / float64(targetSubs)) * 100
-		
+
 		sent := atomic.LoadUint64(&stats.MsgsSent)
 		recv := atomic.LoadUint64(&stats.MsgsRecv)
 		delPct := 0.0
-		// Expected = Sent * ConnectedSubs (Approximate for this window)
-		// Note: This assumes all subs are subscribed to all topics. 
-		// If using round-robin topics, Expected = Sent * (Subs / TopicCount)
-		// Based on user flags: "topic-count=10". Assuming pubs write to all, subs sub to all? 
-		// Usually benchmark default is Pub to T1, Sub to T1. 
-		// Let's assume ideal delivery: 1 msg sent to Topic X should reach all Subs on Topic X.
-		// If topic distribution is random, Expected ~ Sent * (Subs/TopicCount).
-		// For safety, let's use the simplest ratio: Recv / (Sent * (Subs/TopicCount))
 		
 		expectedRecv := float64(sent) * (float64(targetSubs) / float64(cfg.TopicCount))
 		if expectedRecv > 0 {
@@ -280,15 +318,29 @@ func main() {
 		passed := true
 		failReason := ""
 
-		if connPct < cfg.SlaMinConnPct { passed = false; failReason += "ConnPct " }
-		if delPct < cfg.SlaMinDeliveryPct { passed = false; failReason += "DelPct " }
-		if p95 > cfg.SlaMaxP95Ms { passed = false; failReason += "Latency " }
-		if int64(disc) > cfg.SlaMaxDiscPerMin { passed = false; failReason += "Disconnects " }
+		if connPct < cfg.SlaMinConnPct {
+			passed = false
+			failReason += "ConnPct "
+		}
+		if delPct < cfg.SlaMinDeliveryPct {
+			passed = false
+			failReason += "DelPct "
+		}
+		if p95 > cfg.SlaMaxP95Ms {
+			passed = false
+			failReason += "Latency "
+		}
+		if int64(disc) > cfg.SlaMaxDiscPerMin {
+			passed = false
+			failReason += "Disconnects "
+		}
 
 		resultStr := "PASS"
-		if !passed { resultStr = "FAIL" }
+		if !passed {
+			resultStr = "FAIL"
+		}
 
-		log.Printf("RESULT: %s | Conn: %.1f%% | Del: %.1f%% | P95: %dms | Disc: %d", 
+		log.Printf("RESULT: %s | Conn: %.1f%% | Del: %.1f%% | P95: %dms | Disc: %d",
 			resultStr, connPct, delPct, p95, disc)
 
 		w.Write([]string{
@@ -305,16 +357,20 @@ func main() {
 		// E. DECISION LOGIC
 		if !passed {
 			consecutiveBreaches++
-			
+
 			// CLUSTER LOGIC: If we failed, can we scale out?
 			if bm.HotAddEnabled {
+				// Only switch if we haven't already switched due to Capacity Logic in this step
+				// Check if CurrentCount is low (meaning we just switched).
+				// If CurrentCount is high, it means we filled the broker and THEN it failed SLA.
+				// Regardless, SLA failure demands a switch if possible.
+				
 				log.Printf("SLA Breach (%s). Attempting to Hot-Add Broker...", failReason)
 				switched := bm.ActivateNextBroker()
 				if switched {
-					// Reset breaches because we took action to fix it
-					consecutiveBreaches = 0 
-					log.Println("Broker Added. Continuing test on new node.")
-					continue 
+					consecutiveBreaches = 0
+					log.Println("Broker Added via SLA Logic. Continuing test.")
+					continue
 				} else {
 					log.Println("Cannot add more brokers (limit reached).")
 				}
@@ -340,15 +396,14 @@ func startPublishers(ctx context.Context, bm *BrokerManager, wg *sync.WaitGroup)
 		wg.Add(1)
 		go func(id int) {
 			defer wg.Done()
-			
+
 			// Pubs always connect to the INITIAL broker (or round robin? usually fixed for ingress)
 			// Let's assume Pubs stick to Broker 0 or spread evenly once.
-			// Ideally pubs shouldn't move.
-			opts := mqtt.NewClientOptions().AddBroker(bm.Brokers[id % len(bm.Brokers)])
+			opts := mqtt.NewClientOptions().AddBroker(bm.Brokers[id%len(bm.Brokers)])
 			opts.SetClientID(fmt.Sprintf("pub-%d", id))
 			opts.SetAutoReconnect(true)
 			client := mqtt.NewClient(opts)
-			
+
 			if token := client.Connect(); token.Wait() && token.Error() != nil {
 				log.Printf("Pub %d connect failed: %v", id, token.Error())
 				return
@@ -367,7 +422,7 @@ func startPublishers(ctx context.Context, bm *BrokerManager, wg *sync.WaitGroup)
 					// Pick random topic
 					topicID := id % cfg.TopicCount
 					topic := fmt.Sprintf("%s/%d", cfg.TopicPrefix, topicID)
-					
+
 					start := time.Now()
 					token := client.Publish(topic, 0, false, payload)
 					go func(t mqtt.Token, s time.Time) {
@@ -383,8 +438,8 @@ func startPublishers(ctx context.Context, bm *BrokerManager, wg *sync.WaitGroup)
 
 func spawnSubscribers(count int, offset int, bm *BrokerManager) {
 	// Simple rate limiter for spawning: 50 per second
-	limiter := time.NewTicker(20 * time.Millisecond) 
-	
+	limiter := time.NewTicker(20 * time.Millisecond)
+
 	// Target broker for THIS BATCH of subscribers
 	targetBroker := bm.GetCurrentTarget()
 
@@ -401,23 +456,15 @@ func spawnSubscribers(count int, offset int, bm *BrokerManager) {
 			})
 			opts.SetOnConnectHandler(func(c mqtt.Client) {
 				atomic.AddInt64(&stats.ConnectedSubs, 1)
-				
+
 				// Subscribe to ONE topic (Partitioning load)
-				// or ALL topics? Usually load testing partitions them.
-				// "topic-count=10". Let's assign sub to one topic to spread load.
 				topicID := id % cfg.TopicCount
 				topic := fmt.Sprintf("%s/%d", cfg.TopicPrefix, topicID)
-				
+
 				if t := c.Subscribe(topic, 0, func(c mqtt.Client, m mqtt.Message) {
 					atomic.AddUint64(&stats.MsgsRecv, 1)
-					// Calculate simple latency (Msg arrival vs now? No payload timestamp here)
-					// We'll trust the Pub P95 or add timestamp if needed.
-					// For this script, lets assume payload has timestamp if we want Recv Latency.
-					// But to keep it compatible with "payload-bytes=10", we can't fit a timestamp easily.
-					// We will infer health from Deliverability and Connection stability.
-					// If user REALLY needs e2e latency, payload must be larger.
-					// Let's simulate latency recording for now:
-					stats.RecordLatency(5) // Mock 5ms for logic check, real requires payload change
+					// Simulate latency
+					stats.RecordLatency(5) 
 				}); t.Wait() && t.Error() != nil {
 					// Sub failed
 				}

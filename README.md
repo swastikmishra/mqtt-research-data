@@ -361,5 +361,6 @@ go run main.go \
   --payload-bytes=10 \
   --initial-subs=500 --sub-step=500 --max-subs=20000 \
   --publishers=50 --pub-rate=1 \
+  --max-client-per-broker=600 \
   --sla-max-p95-ms=1000 --sla-consecutive-breaches=5
 ```
