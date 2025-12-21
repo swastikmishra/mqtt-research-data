@@ -1,0 +1,43 @@
+{
+  "config": {
+    "BrokerHost": "127.0.0.1",
+    "BrokerPort": 1883,
+    "BrokersJSON": "./brokers.json",
+    "ClusterIncremental": false,
+    "TestName": "S2-P10_cluster_fixed_subscale_10B",
+    "OutDir": "./results",
+    "InitialSubs": 500,
+    "SubStep": 100,
+    "MaxSubs": 20000,
+    "WindowSec": 60,
+    "WarmupSec": 10,
+    "MaxEpochSec": 1800,
+    "MaxTotalSec": 7200,
+    "Publishers": 50,
+    "PubRatePerSec": 1,
+    "TopicPrefix": "bench/topic",
+    "TopicCount": 10,
+    "PayloadBytes": 10,
+    "LatencySampleN": 50,
+    "MinConnectedSubPct": 99,
+    "MinDeliveryRatioPct": 99,
+    "MaxP95LatencyMs": 200,
+    "MaxDiscPerMin": 50,
+    "ConsecutiveBreaches": 2
+  },
+  "started_at": "2025-12-21T12:38:19.626545016Z",
+  "finished_at": "2025-12-21T12:40:19.657305253Z",
+  "epochs": [
+    {
+      "epoch_index": 1,
+      "brokers_used": 3,
+      "started_at": "2025-12-21T12:38:19.626602681Z",
+      "finished_at": "2025-12-21T12:40:19.657303254Z",
+      "max_sustainable_subscribers": 0,
+      "failed_at_subscribers": 600,
+      "fail_reason": "p95_ms=875.00 \u003e 200.00",
+      "stopped_by_sla": true
+    }
+  ],
+  "stop_reason": "stopped: SLA failure"
+}
