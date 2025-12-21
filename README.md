@@ -129,158 +129,156 @@ Example:
 
 ## Tests
 
-#### Set 1: Single Node Scenarios
-
-| ID  | Test Name            | Subs  | Pubs | Payload | Rate (per Pub) | Total Tput  | Duration | Test Goal                                                                  |
-| --- | -------------------- | ----- | ---- | ------- | -------------- | ----------- | -------- | -------------------------------------------------------------------------- |
-| S1  | single_latency_base  | 100   | 1    | 1 KB    | 10             | 10 msg/s    | 180s     | Baseline Latency. Minimal load to find "best case" response time.          |
-| S2  | single_cpu_stress    | 500   | 50   | 1 KB    | 50             | 2,500 msg/s | 180s     | High Throughput (CPU). High interrupt rate with small packets.             |
-| S3  | single_fanout_stress | 1,000 | 10   | 1 KB    | 100            | 1,000 msg/s | 180s     | Fan-Out Logic. High fan-out (1 pub → 1000 subs) to test dispatch speed.    |
-| S4  | single_conn_max      | 5,000 | 1    | 1 KB    | 1              | 1 msg/s     | 300s     | Max Connections (RAM). Idle connection holding capacity (Longer duration). |
-| S5  | single_bw_limit      | 200   | 10   | 50 KB   | 5              | 50 msg/s    | 180s     | Bandwidth Saturation. Tests network I/O limits (~25MB/s ingress).          |
-
-#### Set 2: Clustered Node Scenarios
-
-| ID  | Test Name             | Subs  | Pubs | Payload | Rate (per Pub) | Total Tput  | Duration | Test Goal                                                                        |
-| --- | --------------------- | ----- | ---- | ------- | -------------- | ----------- | -------- | -------------------------------------------------------------------------------- |
-| C1  | cluster_latency_base  | 100   | 1    | 1 KB    | 10             | 10 msg/s    | 180s     | Cluster Tax. Compare vs S1 to see overhead of cluster hops.                      |
-| C2  | cluster_cpu_stress    | 500   | 50   | 1 KB    | 50             | 2,500 msg/s | 180s     | CPU & Sync. High packet rate stresses internal cluster state sync.               |
-| C3  | cluster_fanout_stress | 1,000 | 10   | 1 KB    | 100            | 1,000 msg/s | 180s     | Routing Efficiency. Tests if messages reach subs on different nodes efficiently. |
-| C4  | cluster_conn_max      | 5,000 | 1    | 1 KB    | 1              | 1 msg/s     | 300s     | Distributed RAM. Can the cluster hold more idle conns than Single?               |
-| C5  | cluster_bw_limit      | 200   | 10   | 50 KB   | 5              | 50 msg/s    | 180s     | Network Dist. Does splitting traffic across nodes increase total BW capacity?    |
+| Scenario ID | Scenario Name                                          | Broker Mode | Broker Scale Strategy     | Initial Brokers | Max Brokers | Subscriber Strategy | Subscriber Step | Initial Subs | Max Subs | Publisher Strategy | Publishers | Publish Rate / Pub | QoS | Payload (Bytes) | Topics | Hold Window (s) | Warmup (s) | Primary Stop SLA             | Secondary Stop SLAs                                     | Notes                |
+| ----------- | ------------------------------------------------------ | ----------- | ------------------------- | --------------- | ----------- | ------------------- | --------------- | ------------ | -------- | ------------------ | ---------- | ------------------ | --- | --------------- | ------ | --------------- | ---------- | ---------------------------- | ------------------------------------------------------- | -------------------- |
+| S1-P10      | Single Broker – Sub Scaling (10B)                      | Single      | None                      | 1               | 1           | Ramp subscribers    | +100            | N            | M        | Fixed              | P          | R msg/s            | 0   | 10              | T      | 60              | 30         | p95 latency > SLA            | delivery <99%, connected subs <99%, disconnects/min > X | Baseline capacity    |
+| S1-P100     | Single Broker – Sub Scaling (100B)                     | Single      | None                      | 1               | 1           | Ramp subscribers    | +100            | N            | M        | Fixed              | P          | R msg/s            | 0   | 100             | T      | 60              | 30         | p95 latency > SLA            | delivery <99%, connected subs <99%, disconnects/min > X | Payload impact       |
+| S1-P1000    | Single Broker – Sub Scaling (1000B)                    | Single      | None                      | 1               | 1           | Ramp subscribers    | +100            | N            | M        | Fixed              | P          | R msg/s            | 0   | 1000            | T      | 60              | 30         | p95 latency > SLA            | delivery <99%, connected subs <99%, disconnects/min > X | Large payload        |
+| S2-P10      | Clustered – Fixed Brokers – Sub Scaling (10B)          | Cluster     | Fixed broker set          | K               | K           | Ramp subscribers    | +100            | N            | M        | Fixed              | P          | R msg/s            | 0   | 10              | T      | 60              | 30         | p95 latency > SLA            | delivery <99%, connected subs <99%, disconnects/min > X | Distribution effects |
+| S2-P100     | Clustered – Fixed Brokers – Sub Scaling (100B)         | Cluster     | Fixed broker set          | K               | K           | Ramp subscribers    | +100            | N            | M        | Fixed              | P          | R msg/s            | 0   | 100             | T      | 60              | 30         | p95 latency > SLA            | delivery <99%, connected subs <99%, disconnects/min > X | Scaling vs payload   |
+| S2-P1000    | Clustered – Fixed Brokers – Sub Scaling (1000B)        | Cluster     | Fixed broker set          | K               | K           | Ramp subscribers    | +100            | N            | M        | Fixed              | P          | R msg/s            | 0   | 1000            | T      | 60              | 30         | p95 latency > SLA            | delivery <99%, connected subs <99%, disconnects/min > X | Upper bound          |
+| S3-P10      | Clustered – Incremental Broker Scale (10B)             | Cluster     | Add broker on SLA failure | 1               | B           | Ramp subscribers    | +100            | N            | M        | Fixed              | P          | R msg/s            | 0   | 10              | T      | 60              | 30         | SLA fail w/ all brokers used | same as above                                           | Staircase scaling    |
+| S3-P100     | Clustered – Incremental Broker Scale (100B)            | Cluster     | Add broker on SLA failure | 1               | B           | Ramp subscribers    | +100            | N            | M        | Fixed              | P          | R msg/s            | 0   | 100             | T      | 60              | 30         | SLA fail w/ all brokers used | same as above                                           | Capacity gains       |
+| S3-P1000    | Clustered – Incremental Broker Scale (1000B)           | Cluster     | Add broker on SLA failure | 1               | B           | Ramp subscribers    | +100            | N            | M        | Fixed              | P          | R msg/s            | 0   | 1000            | T      | 60              | 30         | SLA fail w/ all brokers used | same as above                                           | Diminishing returns  |
+| S4S-P10     | Single Broker – Throughput Scaling (10B)               | Single      | None                      | 1               | 1           | Fixed subscribers   | —               | S            | S        | Ramp publish rate  | P          | +ΔR msg/s          | 0   | 10              | T      | 60              | 30         | p95 latency > SLA            | delivery <99%                                           | Throughput ceiling   |
+| S4S-P100    | Single Broker – Throughput Scaling (100B)              | Single      | None                      | 1               | 1           | Fixed subscribers   | —               | S            | S        | Ramp publish rate  | P          | +ΔR msg/s          | 0   | 100             | T      | 60              | 30         | p95 latency > SLA            | delivery <99%                                           | Payload effect       |
+| S4S-P1000   | Single Broker – Throughput Scaling (1000B)             | Single      | None                      | 1               | 1           | Fixed subscribers   | —               | S            | S        | Ramp publish rate  | P          | +ΔR msg/s          | 0   | 1000            | T      | 60              | 30         | p95 latency > SLA            | delivery <99%                                           | Bandwidth limit      |
+| S4C-P10     | Clustered – Fixed Brokers – Throughput Scaling (10B)   | Cluster     | Fixed broker set          | K               | K           | Fixed subscribers   | —               | S            | S        | Ramp publish rate  | P          | +ΔR msg/s          | 0   | 10              | T      | 60              | 30         | p95 latency > SLA            | delivery <99%                                           | Throughput ceiling   |
+| S4C-P100    | Clustered – Fixed Brokers – Throughput Scaling (100B)  | Cluster     | Fixed broker set          | K               | K           | Fixed subscribers   | —               | S            | S        | Ramp publish rate  | P          | +ΔR msg/s          | 0   | 100             | T      | 60              | 30         | p95 latency > SLA            | delivery <99%                                           | Payload effect       |
+| S4C-P1000   | Clustered – Fixed Brokers – Throughput Scaling (1000B) | Cluster     | Fixed broker set          | K               | K           | Fixed subscribers   | —               | S            | S        | Ramp publish rate  | P          | +ΔR msg/s          | 0   | 1000            | T      | 60              | 30         | p95 latency > SLA            | delivery <99%                                           | Bandwidth limit      |
 
 ### Test Commands:
 
-#### Single Node Commands
+#### S1 — Single Broker: Subscriber Scaling
 
-**S1: Baseline Latency**
+##### S1-P10
 
 ```bash
-go run main.go \
+go run mqtt_scale_tester.go \
   --broker-host=43.205.176.30 --broker-port=1883 \
-  --out-dir=./results --test-name=single_latency_base \
-  --fixed-subs=100 --fixed-pubs=1 \
-  --payload-kb=1 --pub-rate=10 \
-  --max-duration-sec=180 --warmup-sec=10 \
-  --topic-count=10 \
-  --min-connected-sub-pct=90 --min-delivery-ratio-pct=99 --max-p95-latency-ms=200
+  --out-dir=./results --test-name=S1-P10_single_subscale_10B \
+  --initial-subs=500 --sub-step=100 --max-subs=20000 \
+  --publishers=50 --pub-rate=1 \
+  --payload-bytes=10 --topic-count=10 --topic-prefix=bench/topic \
+  --window-sec=60 --warmup-sec=10 \
+  --sla-min-connected-sub-pct=99 --sla-min-delivery-pct=99 --sla-max-p95-ms=200 --sla-max-disc-per-min=50 \
+  --sla-consecutive-breaches=2
 ```
 
-**S2: CPU Stress (High Packet Rate)**
+##### S1-P100
 
 ```bash
-go run main.go \
+go run mqtt_scale_tester.go \
   --broker-host=43.205.176.30 --broker-port=1883 \
-  --out-dir=./results --test-name=single_cpu_stress \
-  --fixed-subs=500 --fixed-pubs=50 \
-  --payload-kb=1 --pub-rate=50 \
-  --max-duration-sec=180 --warmup-sec=10 \
-  --topic-count=10 \
-  --min-connected-sub-pct=90 --min-delivery-ratio-pct=95 --max-p95-latency-ms=1000
+  --out-dir=./results --test-name=S1-P100_single_subscale_100B \
+  --initial-subs=500 --sub-step=100 --max-subs=20000 \
+  --publishers=50 --pub-rate=1 \
+  --payload-bytes=100 --topic-count=10 --topic-prefix=bench/topic \
+  --window-sec=60 --warmup-sec=10 \
+  --sla-min-connected-sub-pct=99 --sla-min-delivery-pct=99 --sla-max-p95-ms=200 --sla-max-disc-per-min=50 \
+  --sla-consecutive-breaches=2
 ```
 
-**S3: Fan-Out Stress**
+##### S1-P1000
 
 ```bash
-go run main.go \
+go run mqtt_scale_tester.go \
   --broker-host=43.205.176.30 --broker-port=1883 \
-  --out-dir=./results --test-name=single_fanout_stress \
-  --fixed-subs=1000 --fixed-pubs=10 \
-  --payload-kb=1 --pub-rate=100 \
-  --max-duration-sec=180 --warmup-sec=10 \
-  --topic-count=10 \
-  --min-connected-sub-pct=90 --min-delivery-ratio-pct=95 --max-p95-latency-ms=2000
+  --out-dir=./results --test-name=S1-P1000_single_subscale_1000B \
+  --initial-subs=500 --sub-step=100 --max-subs=20000 \
+  --publishers=50 --pub-rate=1 \
+  --payload-bytes=1000 --topic-count=10 --topic-prefix=bench/topic \
+  --window-sec=60 --warmup-sec=10 \
+  --sla-min-connected-sub-pct=99 --sla-min-delivery-pct=99 --sla-max-p95-ms=200 --sla-max-disc-per-min=50 \
+  --sla-consecutive-breaches=2
 ```
 
-**S4: Max Connections (RAM)**
+#### S2 — Cluster (Fixed brokers.json): Subscriber Scaling
+
+##### S2-P10
 
 ```bash
-go run main.go \
-  --broker-host=43.205.176.30 --broker-port=1883 \
-  --out-dir=./results --test-name=single_conn_max \
-  --fixed-subs=5000 --fixed-pubs=1 \
-  --payload-kb=1 --pub-rate=1 \
-  --max-duration-sec=300 --warmup-sec=20 \
-  --topic-count=10 \
-  --min-connected-sub-pct=95 --min-delivery-ratio-pct=99 --max-p95-latency-ms=5000
+go run mqtt_scale_tester.go \
+  --brokers-json=./brokers.json --cluster-incremental=false \
+  --out-dir=./results --test-name=S2-P10_cluster_fixed_subscale_10B \
+  --initial-subs=500 --sub-step=100 --max-subs=20000 \
+  --publishers=50 --pub-rate=1 \
+  --payload-bytes=10 --topic-count=10 --topic-prefix=bench/topic \
+  --window-sec=60 --warmup-sec=10 \
+  --sla-min-connected-sub-pct=99 --sla-min-delivery-pct=99 --sla-max-p95-ms=200 --sla-max-disc-per-min=50 \
+  --sla-consecutive-breaches=2
 ```
 
-**S5: Bandwidth Limit**
+##### S2-P100
 
 ```bash
-go run main.go \
-  --broker-host=43.205.176.30 --broker-port=1883 \
-  --out-dir=./results --test-name=single_bw_limit \
-  --fixed-subs=200 --fixed-pubs=10 \
-  --payload-kb=50 --pub-rate=5 \
-  --max-duration-sec=180 --warmup-sec=10 \
-  --topic-count=10 \
-  --min-connected-sub-pct=90 --min-delivery-ratio-pct=95 --max-p95-latency-ms=2000
+go run mqtt_scale_tester.go \
+  --brokers-json=./brokers.json --cluster-incremental=false \
+  --out-dir=./results --test-name=S2-P100_cluster_fixed_subscale_100B \
+  --initial-subs=500 --sub-step=100 --max-subs=20000 \
+  --publishers=50 --pub-rate=1 \
+  --payload-bytes=100 --topic-count=10 --topic-prefix=bench/topic \
+  --window-sec=60 --warmup-sec=10 \
+  --sla-min-connected-sub-pct=99 --sla-min-delivery-pct=99 --sla-max-p95-ms=200 --sla-max-disc-per-min=50 \
+  --sla-consecutive-breaches=2
 ```
 
-#### Cluster Node Commands
-
-**C1: Baseline Latency**
+##### S2-P1000
 
 ```bash
-go run main.go \
-  --brokers-json=./brokers.json \
-  --out-dir=./results --test-name=cluster_latency_base \
-  --fixed-subs=100 --fixed-pubs=1 \
-  --payload-kb=1 --pub-rate=10 \
-  --max-duration-sec=180 --warmup-sec=10 \
-  --topic-count=10 \
-  --min-connected-sub-pct=90 --min-delivery-ratio-pct=99 --max-p95-latency-ms=200
+go run mqtt_scale_tester.go \
+  --brokers-json=./brokers.json --cluster-incremental=false \
+  --out-dir=./results --test-name=S2-P1000_cluster_fixed_subscale_1000B \
+  --initial-subs=500 --sub-step=100 --max-subs=20000 \
+  --publishers=50 --pub-rate=1 \
+  --payload-bytes=1000 --topic-count=10 --topic-prefix=bench/topic \
+  --window-sec=60 --warmup-sec=10 \
+  --sla-min-connected-sub-pct=99 --sla-min-delivery-pct=99 --sla-max-p95-ms=200 --sla-max-disc-per-min=50 \
+  --sla-consecutive-breaches=2
 ```
 
-**C2: CPU Stress (High Packet Rate)**
+#### S3 — Cluster Incremental: Add broker when SLA fails
+
+> Starts with 1 broker, ramps subscribers until SLA fails, then restarts epoch with 2 brokers, etc.
+
+##### S3-P10
 
 ```bash
-go run main.go \
-  --brokers-json=./brokers.json \
-  --out-dir=./results --test-name=cluster_cpu_stress \
-  --fixed-subs=500 --fixed-pubs=50 \
-  --payload-kb=1 --pub-rate=50 \
-  --max-duration-sec=180 --warmup-sec=10 \
-  --topic-count=10 \
-  --min-connected-sub-pct=90 --min-delivery-ratio-pct=95 --max-p95-latency-ms=1000
+go run mqtt_scale_tester.go \
+  --brokers-json=./brokers.json --cluster-incremental=true \
+  --out-dir=./results --test-name=S3-P10_cluster_incremental_subscale_10B \
+  --initial-subs=500 --sub-step=100 --max-subs=20000 \
+  --publishers=50 --pub-rate=1 \
+  --payload-bytes=10 --topic-count=10 --topic-prefix=bench/topic \
+  --window-sec=60 --warmup-sec=10 \
+  --sla-min-connected-sub-pct=99 --sla-min-delivery-pct=99 --sla-max-p95-ms=200 --sla-max-disc-per-min=50 \
+  --sla-consecutive-breaches=2
 ```
 
-**C3: Fan-Out Stress**
+##### S3-P100
 
 ```bash
-go run main.go \
-  --brokers-json=./brokers.json \
-  --out-dir=./results --test-name=cluster_fanout_stress \
-  --fixed-subs=1000 --fixed-pubs=10 \
-  --payload-kb=1 --pub-rate=100 \
-  --max-duration-sec=180 --warmup-sec=10 \
-  --topic-count=10 \
-  --min-connected-sub-pct=90 --min-delivery-ratio-pct=95 --max-p95-latency-ms=2000
+go run mqtt_scale_tester.go \
+  --brokers-json=./brokers.json --cluster-incremental=true \
+  --out-dir=./results --test-name=S3-P100_cluster_incremental_subscale_100B \
+  --initial-subs=500 --sub-step=100 --max-subs=20000 \
+  --publishers=50 --pub-rate=1 \
+  --payload-bytes=100 --topic-count=10 --topic-prefix=bench/topic \
+  --window-sec=60 --warmup-sec=10 \
+  --sla-min-connected-sub-pct=99 --sla-min-delivery-pct=99 --sla-max-p95-ms=200 --sla-max-disc-per-min=50 \
+  --sla-consecutive-breaches=2
 ```
 
-**C4: Max Connections (RAM)**
+##### S3-P1000
 
 ```bash
-go run main.go \
-  --brokers-json=./brokers.json \
-  --out-dir=./results --test-name=cluster_conn_max \
-  --fixed-subs=5000 --fixed-pubs=1 \
-  --payload-kb=1 --pub-rate=1 \
-  --max-duration-sec=300 --warmup-sec=20 \
-  --topic-count=10 \
-  --min-connected-sub-pct=95 --min-delivery-ratio-pct=99 --max-p95-latency-ms=5000
-```
-
-**C5: Bandwidth Limit**
-
-```bash
-go run main.go \
-  --brokers-json=./brokers.json \
-  --out-dir=./results --test-name=cluster_bw_limit \
-  --fixed-subs=200 --fixed-pubs=10 \
-  --payload-kb=50 --pub-rate=5 \
-  --max-duration-sec=180 --warmup-sec=10 \
-  --topic-count=10 \
-  --min-connected-sub-pct=90 --min-delivery-ratio-pct=95 --max-p95-latency-ms=2000
+go run mqtt_scale_tester.go \
+  --brokers-json=./brokers.json --cluster-incremental=true \
+  --out-dir=./results --test-name=S3-P1000_cluster_incremental_subscale_1000B \
+  --initial-subs=500 --sub-step=100 --max-subs=20000 \
+  --publishers=50 --pub-rate=1 \
+  --payload-bytes=1000 --topic-count=10 --topic-prefix=bench/topic \
+  --window-sec=60 --warmup-sec=10 \
+  --sla-min-connected-sub-pct=99 --sla-min-delivery-pct=99 --sla-max-p95-ms=200 --sla-max-disc-per-min=50 \
+  --sla-consecutive-breaches=2
 ```
