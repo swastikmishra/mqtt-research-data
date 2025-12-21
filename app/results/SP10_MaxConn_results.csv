@@ -1,4 +1,4 @@
-TotalSubs,ActiveBroker,ConnPct,DelPct,P95Lat_ms,MinLat_ms,MaxLat_ms,AvgLat_ms,Throughput_MBps,Disconnects,Result
-500,tcp://43.205.176.30:1883,100.00,100.00,44,0,83,22,0.02,0,PASS
-1000,tcp://43.205.176.30:1883,96.60,96.62,92,0,217,48,0.05,0,FAIL
-1500,tcp://43.205.176.30:1883,64.40,64.41,90,0,456,49,0.05,0,FAIL
+TotalSubs,ActiveBroker,ConnPct,DelPct,P95Lat_ms,MinLat_ms,MaxLat_ms,AvgLat_ms,Throughput_MBps,Disconnects
+500,tcp://43.205.176.30:1883,100.00,100.00,44,0,83,22,0.02,0
+1000,tcp://43.205.176.30:1883,96.60,96.62,92,0,217,48,0.05,0
+1500,tcp://43.205.176.30:1883,64.40,64.41,90,0,456,49,0.05,0
