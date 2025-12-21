@@ -4,6 +4,7 @@
     "BrokerPort": 1883,
     "BrokersJSON": "",
     "ClusterIncremental": false,
+    "ClusterHotAddNewClients": false,
     "TestName": "S1-P100_single_subscale_100B",
     "OutDir": "./results",
     "InitialSubs": 500,
@@ -25,17 +26,17 @@
     "MaxDiscPerMin": 50,
     "ConsecutiveBreaches": 2
   },
-  "started_at": "2025-12-21T12:36:01.222925868Z",
-  "finished_at": "2025-12-21T12:38:01.269381096Z",
+  "started_at": "2025-12-21T13:58:05.291786382Z",
+  "finished_at": "2025-12-21T14:00:05.318986104Z",
   "epochs": [
     {
       "epoch_index": 1,
       "brokers_used": 1,
-      "started_at": "2025-12-21T12:36:01.222988138Z",
-      "finished_at": "2025-12-21T12:38:01.269377349Z",
+      "started_at": "2025-12-21T13:58:05.291847616Z",
+      "finished_at": "2025-12-21T14:00:05.31898337Z",
       "max_sustainable_subscribers": 0,
       "failed_at_subscribers": 600,
-      "fail_reason": "p95_ms=875.00 \u003e 200.00",
+      "fail_reason": "p95_ms=1250.00 \u003e 200.00",
       "stopped_by_sla": true
     }
   ],

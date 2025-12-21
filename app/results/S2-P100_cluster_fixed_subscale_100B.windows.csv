@@ -1,3 +1,3 @@
 ts_utc,epoch_index,brokers_used,step_index,target_subs,target_pubs,connected_subs,fully_subscribed_subs,connected_pubs,sub_conn_ok,sub_conn_fail,sub_disc,sub_sub_err,pub_conn_ok,pub_conn_fail,pub_disc,pubs_sent,pubs_err,msgs_recv,expected,delivery_ratio,p50_ms,p95_ms,p99_ms,disconnects_per_min,sla_breached,sla_reason
-2025-12-21T12:42:50Z,1,3,1,500,50,500,500,50,500,0,0,0,50,0,0,2999,0,1477027,1499500,0.985013,625.000,875.000,1750.000,0.000,true,delivery_pct=98.50 < 99.00
-2025-12-21T12:43:50Z,1,3,2,600,50,600,600,50,100,0,0,0,0,0,0,3000,0,1797058,1800000,0.998366,625.000,875.000,875.000,0.000,true,p95_ms=875.00 > 200.00
+2025-12-21T14:05:43Z,1,3,1,500,50,500,500,50,500,0,0,0,50,0,0,2995,0,1476282,1497500,0.985831,625.000,875.000,875.000,0.000,true,delivery_pct=98.58 < 99.00
+2025-12-21T14:06:43Z,1,3,2,600,50,600,600,50,100,0,0,0,0,0,0,3002,0,1797162,1801200,0.997758,625.000,875.000,1250.000,0.000,true,p95_ms=875.00 > 200.00
