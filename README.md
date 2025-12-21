@@ -307,3 +307,59 @@ go run main.go \
   --sla-min-connected-sub-pct=99 --sla-min-delivery-pct=99 --sla-max-p95-ms=200 --sla-max-disc-per-min=50 \
   --sla-consecutive-breaches=2
 ```
+
+## Tests (V2)
+
+### Common Setup (Global Defaults)
+
+| Parameter          | Value                   | Flag                            |
+| ------------------ | ----------------------- | ------------------------------- |
+| Subscriber Step    | 100                     | --sub-step=100                  |
+| Initial Subs       | 500                     | --initial-subs=500              |
+| Max Subs           | 20000                   | --max-subs=20000                |
+| Publisher Strategy | Fixed (50 Pubs)         | --publishers=50                 |
+| Publish Rate       | 1 msg/sec               | --pub-rate=1                    |
+| Topic Strategy     | 10 Topics (Partitioned) | --topic-count=10                |
+| Timings            | 30s Warmup / 60s Window | --warmup-sec=30 --window-sec=60 |
+
+### Test Scenarios
+
+| ID     | Scenario Name     | Logic                                                                     | Broker Config | Payload | Key Flags (add to defaults)                                      |
+| ------ | ----------------- | ------------------------------------------------------------------------- | ------------- | ------- | ---------------------------------------------------------------- |
+| S1-P10 | Single - Baseline | Run on 1 node until failure.                                              | Single IP     | 10 B    | --cluster-hot-add-new-clients=false --payload-bytes=10           |
+| S2-P10 | Cluster - Hot Add | Start on Broker 1. On SLA Breach, script directs new clients to Broker 2. | brokers.json  | 10 B    | --brokers-json=./brokers.json --cluster-hot-add-new-clients=true |
+
+### SLA Metrics
+
+| Scenario | Primary Trigger (Stop or Failover) | Flags to Set                                     | Notes                                                           |
+| -------- | ---------------------------------- | ------------------------------------------------ | --------------------------------------------------------------- |
+| S1 (All) | Latency > 200ms OR Error Rate      | --sla-max-p95-ms=200--sla-consecutive-breaches=2 | Stops test after 2 failing windows.                             |
+| S2 (All) | Latency > 200ms                    | --sla-max-p95-ms=200--sla-consecutive-breaches=1 | Action: Triggers ActivateNextBroker().Stop: If no brokers left. |
+
+### Test Commands
+
+#### S1 - Single Broker Tests
+
+```bash
+go run main.go \
+  --test-name=S1-P10 \
+  --broker-host=43.205.176.30 \
+  --cluster-hot-add-new-clients=false \
+  --payload-bytes=10 \
+  --initial-subs=500 --sub-step=100 --max-subs=20000 \
+  --publishers=50 --pub-rate=1 \
+  --sla-max-p95-ms=200 --sla-consecutive-breaches=2
+```
+
+#### S2 - Cluster Hot Add Tests
+
+```bash
+go run main.go \
+  --test-name=S3-P10 \
+  --brokers-json=./brokers.json \
+  --cluster-hot-add-new-clients=true \
+  --payload-bytes=10 \
+  --initial-subs=500 --sub-step=100 --max-subs=20000 \
+  --publishers=50 --pub-rate=1 \
+  --sla-max-p95-ms=200 --sla-consecutive-breaches=1
+```
