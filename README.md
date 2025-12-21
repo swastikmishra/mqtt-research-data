@@ -281,7 +281,7 @@ go run main.go \
 ##### S3-P100
 
 ```bash
-go run mqtt_scale_tester.go \
+go run main.go \
   --brokers-json=./brokers.json \
   --cluster-hot-add-new-clients=true \
   --out-dir=./results --test-name=S3-P100_cluster_hotadd_new_clients_only_100B \
@@ -296,7 +296,7 @@ go run mqtt_scale_tester.go \
 ##### S3-P1000
 
 ```bash
-go run mqtt_scale_tester.go \
+go run main.go \
   --brokers-json=./brokers.json \
   --cluster-hot-add-new-clients=true \
   --out-dir=./results --test-name=S3-P1000_cluster_hotadd_new_clients_only_1000B \
