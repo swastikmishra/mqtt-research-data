@@ -163,8 +163,8 @@ Example:
 
 | Scenario      | Primary Trigger (Stop or Failover) | Flags to Set                                      | Notes                                                           |
 | ------------- | ---------------------------------- | ------------------------------------------------- | --------------------------------------------------------------- |
-| Single (All)  | Latency > 1000ms OR Error Rate     | --sla-max-p95-ms=1000--sla-consecutive-breaches=5 | Stops test after 5 failing windows.                             |
-| Cluster (All) | Latency > 1000ms                   | --sla-max-p95-ms=1000--sla-consecutive-breaches=5 | Action: Triggers ActivateNextBroker().Stop: If no brokers left. |
+| Single (All)  | Latency > 1000ms OR Error Rate     | --sla-max-p95-ms=1000--sla-consecutive-breaches=2 | Stops test after 3 failing windows.                             |
+| Cluster (All) | Latency > 1000ms                   | --sla-max-p95-ms=1000--sla-consecutive-breaches=2 | Action: Triggers ActivateNextBroker().Stop: If no brokers left. |
 
 ### Test Commands
 
@@ -184,7 +184,7 @@ go run main.go \
  --publishers=50 --pub-rate=1 \
  --topic-count=10 \
  --warmup-sec=30 --window-sec=60 \
- --sla-max-p95-ms=1000 --sla-consecutive-breaches=5
+ --sla-max-p95-ms=1000 --sla-consecutive-breaches=2
 ```
 
 ##### Scenario SP100: Type B (Stability)
@@ -201,7 +201,7 @@ go run main.go \
  --publishers=50 --pub-rate=1 \
  --topic-count=10 \
  --warmup-sec=30 --window-sec=60 \
- --sla-max-p95-ms=200 --sla-consecutive-breaches=5
+ --sla-max-p95-ms=200 --sla-consecutive-breaches=2
 ```
 
 ##### Scenario SP1000: Type C (Throughput)
@@ -218,7 +218,7 @@ go run main.go \
  --publishers=50 --pub-rate=1 \
  --topic-count=10 \
  --warmup-sec=30 --window-sec=60 \
- --sla-min-delivery-pct=99.0 --sla-consecutive-breaches=5
+ --sla-min-delivery-pct=99.0 --sla-consecutive-breaches=2
 ```
 
 #### 2. Cluster Tests (Scalability)
@@ -230,7 +230,7 @@ go run main.go \
 ```bash
 go run main.go \
  --test-name=CP10_ClusterConn \
- --brokers-json=./brokers.json \
+ --brokers-json=./brokers2.json \
  --cluster-hot-add-new-clients=true \
  --payload-bytes=10 \
  --initial-subs=500 --sub-step=500 --max-subs=40000 \
@@ -247,7 +247,7 @@ go run main.go \
 ```bash
 go run main.go \
  --test-name=CP100_ClusterStability \
- --brokers-json=./brokers.json \
+ --brokers-json=./brokers2.json \
  --cluster-hot-add-new-clients=true \
  --payload-bytes=100 \
  --initial-subs=500 --sub-step=500 --max-subs=20000 \
@@ -264,7 +264,7 @@ go run main.go \
 ```bash
 go run main.go \
  --test-name=CP1000_ClusterThroughput \
- --brokers-json=./brokers.json \
+ --brokers-json=./brokers2.json \
  --cluster-hot-add-new-clients=true \
  --payload-bytes=1000 \
  --initial-subs=500 --sub-step=500 --max-subs=20000 \
