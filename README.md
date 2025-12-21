@@ -129,192 +129,11 @@ Example:
 
 ## Tests
 
-### Common Setup
-
-| Subscriber Step    | 100   |
-| ------------------ | ----- |
-| Initital Subs      | 500   |
-| Max Subs           | 20000 |
-| Publisher Strategy | Fixed |
-| Publishers         | 50    |
-| Publish Rate / Pub | 1     |
-| QoS                | 0     |
-| Topic Count        | 10    |
-| Warmup (s)         | 30    |
-| Window (s)         | 60    |
-
-### Test Scenarios
-
-| Scenario ID | Scenario Name                                   | Broker Mode | Broker Scale Strategy     | Initial Brokers | Max Brokers | Payload (Bytes) |
-| ----------- | ----------------------------------------------- | ----------- | ------------------------- | --------------- | ----------- | --------------- |
-| S1-P10      | Single Broker – Sub Scaling (10B)               | Single      | None                      | 1               | 1           | 10              |
-| S1-P100     | Single Broker – Sub Scaling (100B)              | Single      | None                      | 1               | 1           | 100             |
-| S1-P1000    | Single Broker – Sub Scaling (1000B)             | Single      | None                      | 1               | 1           | 1000            |
-| S2-P10      | Clustered – Fixed Brokers – Sub Scaling (10B)   | Cluster     | Fixed broker set          | 3               | 3           | 10              |
-| S2-P100     | Clustered – Fixed Brokers – Sub Scaling (100B)  | Cluster     | Fixed broker set          | 3               | 3           | 100             |
-| S2-P1000    | Clustered – Fixed Brokers – Sub Scaling (1000B) | Cluster     | Fixed broker set          | 3               | 3           | 1000            |
-| S3-P10      | Clustered – Incremental Broker Scale (10B)      | Cluster     | Add broker on SLA failure | 1               | 3           | 10              |
-| S3-P100     | Clustered – Incremental Broker Scale (100B)     | Cluster     | Add broker on SLA failure | 1               | 3           | 100             |
-| S3-P1000    | Clustered – Incremental Broker Scale (1000B)    | Cluster     | Add broker on SLA failure | 1               | 3           | 1000            |
-
-### SLA Metrics
-
-| Scenario ID | Primary Stop SLA             | Secondary Stop SLAs                                     | Notes                |
-| ----------- | ---------------------------- | ------------------------------------------------------- | -------------------- |
-| S1-P10      | p95 latency > SLA            | delivery <99%, connected subs <99%, disconnects/min > X | Baseline capacity    |
-| S1-P100     | p95 latency > SLA            | delivery <99%, connected subs <99%, disconnects/min > X | Payload impact       |
-| S1-P1000    | p95 latency > SLA            | delivery <99%, connected subs <99%, disconnects/min > X | Large payload        |
-| S2-P10      | p95 latency > SLA            | delivery <99%, connected subs <99%, disconnects/min > X | Distribution effects |
-| S2-P100     | p95 latency > SLA            | delivery <99%, connected subs <99%, disconnects/min > X | Scaling vs payload   |
-| S2-P1000    | p95 latency > SLA            | delivery <99%, connected subs <99%, disconnects/min > X | Upper bound          |
-| S3-P10      | SLA fail w/ all brokers used | same as above                                           | Staircase scaling    |
-| S3-P100     | SLA fail w/ all brokers used | same as above                                           | Capacity gains       |
-| S3-P1000    | SLA fail w/ all brokers used | same as above                                           | Diminishing returns  |
-
-### Test Commands:
-
-#### S1 — Single Broker: Subscriber Scaling
-
-##### S1-P10
-
-```bash
-go run main.go \
-  --broker-host=43.205.176.30 --broker-port=1883 \
-  --out-dir=./results --test-name=S1-P10_single_subscale_10B \
-  --initial-subs=500 --sub-step=100 --max-subs=20000 \
-  --publishers=50 --pub-rate=1 \
-  --payload-bytes=10 --topic-count=10 --topic-prefix=bench/topic \
-  --window-sec=60 --warmup-sec=10 \
-  --sla-min-connected-sub-pct=99 --sla-min-delivery-pct=99 --sla-max-p95-ms=200 --sla-max-disc-per-min=50 \
-  --sla-consecutive-breaches=2
-```
-
-##### S1-P100
-
-```bash
-go run main.go \
-  --broker-host=43.205.176.30 --broker-port=1883 \
-  --out-dir=./results --test-name=S1-P100_single_subscale_100B \
-  --initial-subs=500 --sub-step=100 --max-subs=20000 \
-  --publishers=50 --pub-rate=1 \
-  --payload-bytes=100 --topic-count=10 --topic-prefix=bench/topic \
-  --window-sec=60 --warmup-sec=10 \
-  --sla-min-connected-sub-pct=99 --sla-min-delivery-pct=99 --sla-max-p95-ms=200 --sla-max-disc-per-min=50 \
-  --sla-consecutive-breaches=2
-```
-
-##### S1-P1000
-
-```bash
-go run main.go \
-  --broker-host=43.205.176.30 --broker-port=1883 \
-  --out-dir=./results --test-name=S1-P1000_single_subscale_1000B \
-  --initial-subs=500 --sub-step=100 --max-subs=20000 \
-  --publishers=50 --pub-rate=1 \
-  --payload-bytes=1000 --topic-count=10 --topic-prefix=bench/topic \
-  --window-sec=60 --warmup-sec=10 \
-  --sla-min-connected-sub-pct=99 --sla-min-delivery-pct=99 --sla-max-p95-ms=200 --sla-max-disc-per-min=50 \
-  --sla-consecutive-breaches=2
-```
-
-#### S2 — Cluster (Fixed brokers.json): Subscriber Scaling
-
-##### S2-P10
-
-```bash
-go run main.go \
-  --brokers-json=./brokers.json --cluster-incremental=false \
-  --out-dir=./results --test-name=S2-P10_cluster_fixed_subscale_10B \
-  --initial-subs=500 --sub-step=100 --max-subs=20000 \
-  --publishers=50 --pub-rate=1 \
-  --payload-bytes=10 --topic-count=10 --topic-prefix=bench/topic \
-  --window-sec=60 --warmup-sec=10 \
-  --sla-min-connected-sub-pct=99 --sla-min-delivery-pct=99 --sla-max-p95-ms=200 --sla-max-disc-per-min=50 \
-  --sla-consecutive-breaches=2
-```
-
-##### S2-P100
-
-```bash
-go run main.go \
-  --brokers-json=./brokers.json --cluster-incremental=false \
-  --out-dir=./results --test-name=S2-P100_cluster_fixed_subscale_100B \
-  --initial-subs=500 --sub-step=100 --max-subs=20000 \
-  --publishers=50 --pub-rate=1 \
-  --payload-bytes=100 --topic-count=10 --topic-prefix=bench/topic \
-  --window-sec=60 --warmup-sec=10 \
-  --sla-min-connected-sub-pct=99 --sla-min-delivery-pct=99 --sla-max-p95-ms=200 --sla-max-disc-per-min=50 \
-  --sla-consecutive-breaches=2
-```
-
-##### S2-P1000
-
-```bash
-go run main.go \
-  --brokers-json=./brokers.json --cluster-incremental=false \
-  --out-dir=./results --test-name=S2-P1000_cluster_fixed_subscale_1000B \
-  --initial-subs=500 --sub-step=100 --max-subs=20000 \
-  --publishers=50 --pub-rate=1 \
-  --payload-bytes=1000 --topic-count=10 --topic-prefix=bench/topic \
-  --window-sec=60 --warmup-sec=10 \
-  --sla-min-connected-sub-pct=99 --sla-min-delivery-pct=99 --sla-max-p95-ms=200 --sla-max-disc-per-min=50 \
-  --sla-consecutive-breaches=2
-```
-
-#### S3 — Cluster Incremental: Add broker when SLA fails
-
-##### S3-P10
-
-```bash
-go run main.go \
-  --brokers-json=./brokers.json \
-  --cluster-hot-add-new-clients=true \
-  --out-dir=./results --test-name=S3-P10_cluster_hotadd_new_clients_only_10B \
-  --initial-subs=500 --sub-step=100 --max-subs=20000 \
-  --publishers=50 --pub-rate=1 \
-  --payload-bytes=10 --topic-count=10 --topic-prefix=bench/topic \
-  --window-sec=60 --warmup-sec=30 \
-  --sla-min-connected-sub-pct=99 --sla-min-delivery-pct=99 --sla-max-p95-ms=200 --sla-max-disc-per-min=50 \
-  --sla-consecutive-breaches=2
-```
-
-##### S3-P100
-
-```bash
-go run main.go \
-  --brokers-json=./brokers.json \
-  --cluster-hot-add-new-clients=true \
-  --out-dir=./results --test-name=S3-P100_cluster_hotadd_new_clients_only_100B \
-  --initial-subs=500 --sub-step=100 --max-subs=20000 \
-  --publishers=50 --pub-rate=1 \
-  --payload-bytes=100 --topic-count=10 --topic-prefix=bench/topic \
-  --window-sec=60 --warmup-sec=30 \
-  --sla-min-connected-sub-pct=99 --sla-min-delivery-pct=99 --sla-max-p95-ms=200 --sla-max-disc-per-min=50 \
-  --sla-consecutive-breaches=2
-```
-
-##### S3-P1000
-
-```bash
-go run main.go \
-  --brokers-json=./brokers.json \
-  --cluster-hot-add-new-clients=true \
-  --out-dir=./results --test-name=S3-P1000_cluster_hotadd_new_clients_only_1000B \
-  --initial-subs=500 --sub-step=100 --max-subs=20000 \
-  --publishers=50 --pub-rate=1 \
-  --payload-bytes=1000 --topic-count=10 --topic-prefix=bench/topic \
-  --window-sec=60 --warmup-sec=30 \
-  --sla-min-connected-sub-pct=99 --sla-min-delivery-pct=99 --sla-max-p95-ms=200 --sla-max-disc-per-min=50 \
-  --sla-consecutive-breaches=2
-```
-
-## Tests (V2)
-
 ### Common Setup (Global Defaults)
 
 | Parameter          | Value                   | Flag                            |
 | ------------------ | ----------------------- | ------------------------------- |
-| Subscriber Step    | 100                     | --sub-step=100                  |
+| Subscriber Step    | 500                     | --sub-step=500                  |
 | Initial Subs       | 500                     | --initial-subs=500              |
 | Max Subs           | 20000                   | --max-subs=20000                |
 | Publisher Strategy | Fixed (50 Pubs)         | --publishers=50                 |
@@ -324,42 +143,133 @@ go run main.go \
 
 ### Test Scenarios
 
-| ID  | Scenario Name     | Logic                                                                     | Broker Config | Payload | Key Flags (add to defaults)                                      |
-| --- | ----------------- | ------------------------------------------------------------------------- | ------------- | ------- | ---------------------------------------------------------------- |
-| S1  | Single - Baseline | Run on 1 node until failure.                                              | Single IP     | 10 B    | --cluster-hot-add-new-clients=false --payload-bytes=10           |
-| S2  | Cluster - Hot Add | Start on Broker 1. On SLA Breach, script directs new clients to Broker 2. | brokers.json  | 10 B    | --brokers-json=./brokers.json --cluster-hot-add-new-clients=true |
+#### Single
+
+| Test Type                | Scenario ID | Payload Size | Goal                                                  | Primary Constraint       | Success Criteria                                |
+| ------------------------ | ----------- | ------------ | ----------------------------------------------------- | ------------------------ | ----------------------------------------------- |
+| Type A (Max Connections) | SP10        | 10 Bytes     | Determine max connection count before CPU saturation. | CPU / File Descriptors   | Reach >20k subs with P95 Latency < 200ms        |
+| Type B (Stability)       | SP100       | 100 Bytes    | Measure latency jitter at medium load.                | Mixed CPU & Network      | Maintain steady P95 < 200ms for full 60s window |
+| Type C (Throughput)      | SP1000      | 1 KB         | Determine max network bandwidth (MB/s).               | Network Interface (Mbps) | Delivery Ratio > 99% at max publisher rate      |
+
+#### Cluster
+
+| Test Type                | Scenario ID | Payload Size | Goal                                          | Scaling Strategy                            | Success Criteria                               |
+| ------------------------ | ----------- | ------------ | --------------------------------------------- | ------------------------------------------- | ---------------------------------------------- |
+| Type A (Max Connections) | CP10        | 10 Bytes     | Exceed single-node connection limit by 2x-3x. | Switch broker when Connection Count > Limit | Total Cluster Subs > (Single Node Max \* 2)    |
+| Type B (Stability)       | CP100       | 100 Bytes    | Flatten latency curve during high load.       | Switch broker when P95 Latency > 200ms      | P95 remains < 200ms during the "Switch" event  |
+| Type C (Throughput)      | CP1000      | 1 KB         | Maximize aggregate cluster throughput.        | Switch broker when Delivery Ratio < 99%     | Cluster MPS (Msg/Sec) > (Single Node MPS \* 2) |
 
 ### SLA Metrics
 
-| Scenario | Primary Trigger (Stop or Failover) | Flags to Set                                      | Notes                                                           |
-| -------- | ---------------------------------- | ------------------------------------------------- | --------------------------------------------------------------- |
-| S1 (All) | Latency > 1000ms OR Error Rate     | --sla-max-p95-ms=1000--sla-consecutive-breaches=5 | Stops test after 5 failing windows.                             |
-| S2 (All) | Latency > 1000ms                   | --sla-max-p95-ms=1000--sla-consecutive-breaches=5 | Action: Triggers ActivateNextBroker().Stop: If no brokers left. |
+| Scenario      | Primary Trigger (Stop or Failover) | Flags to Set                                      | Notes                                                           |
+| ------------- | ---------------------------------- | ------------------------------------------------- | --------------------------------------------------------------- |
+| Single (All)  | Latency > 1000ms OR Error Rate     | --sla-max-p95-ms=1000--sla-consecutive-breaches=5 | Stops test after 5 failing windows.                             |
+| Cluster (All) | Latency > 1000ms                   | --sla-max-p95-ms=1000--sla-consecutive-breaches=5 | Action: Triggers ActivateNextBroker().Stop: If no brokers left. |
 
 ### Test Commands
 
-#### S1 - Single Broker Tests
+#### Single Broker Tests (Baseline)
+
+##### Scenario SP10: Type A (Max Connections)
+
+> Goal: Stress CPU/Connection limits with small packets.
 
 ```bash
 go run main.go \
-  --test-name=S1 \
-  --broker-host=43.205.176.30 \
-  --cluster-hot-add-new-clients=false \
-  --payload-bytes=10 \
-  --initial-subs=500 --sub-step=500 --max-subs=20000 \
-  --publishers=50 --pub-rate=1 \
-  --sla-max-p95-ms=1000 --sla-consecutive-breaches=5
+ --test-name=SP10_MaxConn \
+ --broker-host=43.205.176.30 --broker-port=1883 \
+ --cluster-hot-add-new-clients=false \
+ --payload-bytes=10 \
+ --initial-subs=500 --sub-step=500 --max-subs=20000 \
+ --publishers=50 --pub-rate=1 \
+ --topic-count=10 \
+ --warmup-sec=30 --window-sec=60 \
+ --sla-max-p95-ms=1000 --sla-consecutive-breaches=5
 ```
 
-#### S2 - Cluster Hot Add Tests
+##### Scenario SP100: Type B (Stability)
+
+> Goal: Measure jitter with medium payloads.
 
 ```bash
 go run main.go \
-  --test-name=S2 \
-  --brokers-json=./brokers2.json \
-  --cluster-hot-add-new-clients=true \
-  --payload-bytes=10 \
-  --initial-subs=500 --sub-step=500 --max-subs=20000 \
-  --publishers=50 --pub-rate=1 \
-  --sla-max-p95-ms=1000 --sla-consecutive-breaches=5
+ --test-name=SP100_Stability \
+ --broker-host=43.205.176.30 --broker-port=1883 \
+ --cluster-hot-add-new-clients=false \
+ --payload-bytes=100 \
+ --initial-subs=500 --sub-step=500 --max-subs=20000 \
+ --publishers=50 --pub-rate=1 \
+ --topic-count=10 \
+ --warmup-sec=30 --window-sec=60 \
+ --sla-max-p95-ms=200 --sla-consecutive-breaches=5
+```
+
+##### Scenario SP1000: Type C (Throughput)
+
+> Goal: Saturation of Network Bandwidth (1KB payloads).
+
+```bash
+go run main.go \
+ --test-name=SP1000_Throughput \
+--broker-host=43.205.176.30 --broker-port=1883 \
+ --cluster-hot-add-new-clients=false \
+ --payload-bytes=1000 \
+ --initial-subs=500 --sub-step=500 --max-subs=20000 \
+ --publishers=50 --pub-rate=1 \
+ --topic-count=10 \
+ --warmup-sec=30 --window-sec=60 \
+ --sla-min-delivery-pct=99.0 --sla-consecutive-breaches=5
+```
+
+#### 2. Cluster Tests (Scalability)
+
+##### Scenario CP10: Type A (Max Connections)
+
+> Goal: Validate if cluster scales connections linearly.
+
+```bash
+go run main.go \
+ --test-name=CP10_ClusterConn \
+ --brokers-json=./brokers.json \
+ --cluster-hot-add-new-clients=true \
+ --payload-bytes=10 \
+ --initial-subs=500 --sub-step=500 --max-subs=40000 \
+ --publishers=50 --pub-rate=1 \
+ --topic-count=10 \
+ --warmup-sec=30 --window-sec=60 \
+ --sla-max-p95-ms=1000 --sla-consecutive-breaches=2
+```
+
+##### Scenario CP100: Type B (Stability)
+
+> Goal: Validate latency stability during broker "Hot Add" events.
+
+```bash
+go run main.go \
+ --test-name=CP100_ClusterStability \
+ --brokers-json=./brokers.json \
+ --cluster-hot-add-new-clients=true \
+ --payload-bytes=100 \
+ --initial-subs=500 --sub-step=500 --max-subs=20000 \
+ --publishers=50 --pub-rate=1 \
+ --topic-count=10 \
+ --warmup-sec=30 --window-sec=60 \
+ --sla-max-p95-ms=200 --sla-consecutive-breaches=2
+```
+
+##### Scenario CP1000: Type C (Throughput)
+
+> Goal: Validate total cluster bandwidth capacity.
+
+```bash
+go run main.go \
+ --test-name=CP1000_ClusterThroughput \
+ --brokers-json=./brokers.json \
+ --cluster-hot-add-new-clients=true \
+ --payload-bytes=1000 \
+ --initial-subs=500 --sub-step=500 --max-subs=20000 \
+ --publishers=50 --pub-rate=1 \
+ --topic-count=10 \
+ --warmup-sec=30 --window-sec=60 \
+ --sla-min-delivery-pct=99.0 --sla-consecutive-breaches=2
 ```
