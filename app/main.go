@@ -65,8 +65,13 @@ type Config struct {
 	BrokerPort int
 
 	// Cluster brokers file (optional)
-	BrokersJSON        string
-	ClusterIncremental bool // if true: start with 1 broker, add on SLA failure, restart epoch
+	BrokersJSON string
+
+	// Existing behavior (restart epochs)
+	ClusterIncremental bool
+
+	// NEW (S3): hot-add; only new clients pinned to next broker (no rebalance, no restart)
+	ClusterHotAddNewClients bool
 
 	// Test naming / output
 	TestName string
@@ -74,14 +79,14 @@ type Config struct {
 
 	// Load: subscribers
 	InitialSubs int
-	SubStep     int   // +100
-	MaxSubs     int   // safety cap
-	WindowSec   int   // hold each step for this many seconds
-	WarmupSec   int   // warmup per step (ignored windows)
-	MaxEpochSec int   // safety cap per broker-count epoch
-	MaxTotalSec int   // safety cap overall
+	SubStep     int // +100
+	MaxSubs     int // safety cap
+	WindowSec   int // hold each step for this many seconds
+	WarmupSec   int // warmup per step (ignored windows)
+	MaxEpochSec int // safety cap per broker-count epoch (used by restart-epoch incremental / fixed)
+	MaxTotalSec int // safety cap overall
 
-	// Publishers fixed per epoch
+	// Publishers fixed per epoch / run
 	Publishers     int
 	PubRatePerSec  float64 // per publisher
 	TopicPrefix    string
@@ -151,28 +156,6 @@ func pickBrokerDeterministic(brokers []Broker, key string) Broker {
    Metrics and latency histogram (windowed)
    ======================= */
 
-type WindowMetrics struct {
-	// control-plane deltas in window
-	SubConnOK   uint64
-	SubConnFail uint64
-	SubDisc     uint64
-	SubSubErr   uint64
-
-	PubConnOK   uint64
-	PubConnFail uint64
-	PubDisc     uint64
-
-	// data-plane deltas in window
-	PubsSent uint64
-	PubsErr  uint64
-	MsgsRecv uint64
-
-	Expected uint64 // pubs_sent * fully_subscribed_connected_subs
-
-	// latency distribution (sampled)
-	LatHist LatencyHist
-}
-
 type LatencyHist struct {
 	edges  []float64
 	counts []uint64
@@ -221,14 +204,6 @@ func (h *LatencyHist) Quantile(q float64) float64 {
 		}
 	}
 	return h.edges[len(h.edges)-1]
-}
-
-func (h *LatencyHist) MergeFrom(other LatencyHist) {
-	// same edges assumed
-	for i := range h.counts {
-		h.counts[i] += other.counts[i]
-	}
-	h.total += other.total
 }
 
 /* =======================
@@ -632,7 +607,6 @@ func NewPublisher(cfg Config, activeBrokers []Broker, id int, ctr *Counters) *Cl
 					binary.BigEndian.PutUint32(buf[8:12], pubID)
 					binary.BigEndian.PutUint64(buf[12:20], seq)
 
-					// QoS0: do NOT block too hard. Wait with a small budget to avoid runaway buffers.
 					token := client.Publish(topic, 0, false, buf)
 					ok := token.WaitTimeout(200 * time.Millisecond)
 					if !ok || token.Error() != nil {
@@ -647,7 +621,7 @@ func NewPublisher(cfg Config, activeBrokers []Broker, id int, ctr *Counters) *Cl
 }
 
 /* =======================
-   Epoch runner
+   Epoch runner (unchanged)
    ======================= */
 
 type EpochResult struct {
@@ -831,7 +805,7 @@ func runEpoch(parent context.Context, cfg Config, epochIndex int, activeBrokers 
 			discPerMin = float64(discDelta) / windowDur.Minutes()
 		}
 
-		// SLA evaluation: consider warmup; if warmup >= window, window is effectively warmup => don't breach.
+		// SLA evaluation
 		slaBreached := false
 		slaReason := ""
 		if cfg.WarmupSec >= cfg.WindowSec {
@@ -943,7 +917,331 @@ done:
 		FailReason:         failReason,
 		StoppedBySLA:       failReason != "",
 	}
+	_ = pubs // silence (publishers run under ctx)
 	return EpochResult{Summary: es}, nil
+}
+
+/* =======================
+   NEW S3 runner: Hot-add (new clients only), no restart, no rebalance
+   ======================= */
+
+func runHotAddNewClientsOnly(parent context.Context, cfg Config, brokerPool []Broker, windowCSV *WindowCSV) ([]EpochSummary, string, error) {
+	start := time.Now()
+
+	runCtx, cancel := context.WithTimeout(parent, time.Duration(cfg.MaxTotalSec)*time.Second)
+	defer cancel()
+
+	var ctr Counters
+
+	latCh := make(chan LatSample, 200000)
+
+	var windowLatMu sync.Mutex
+	windowLat := NewLatencyHist()
+
+	go func() {
+		for {
+			select {
+			case <-runCtx.Done():
+				return
+			case s := <-latCh:
+				windowLatMu.Lock()
+				windowLat.Add(s.LatencyMs)
+				windowLatMu.Unlock()
+			}
+		}
+	}()
+
+	// Publishers fixed for entire run; pin to broker[0] for the vertical/horizontal story.
+	pubBroker := []Broker{brokerPool[0]}
+	pubs := make([]*ClientRunner, 0, cfg.Publishers)
+	for i := 0; i < cfg.Publishers; i++ {
+		r := NewPublisher(cfg, pubBroker, i, &ctr)
+		pubs = append(pubs, r)
+		go r.Run(runCtx)
+	}
+
+	// Subscriber ramp parameters (same defaults as runEpoch)
+	targetSubs := cfg.InitialSubs
+	if targetSubs < 0 {
+		targetSubs = 0
+	}
+	if cfg.SubStep <= 0 {
+		cfg.SubStep = 100
+	}
+	if cfg.WindowSec <= 0 {
+		cfg.WindowSec = 60
+	}
+	if cfg.WarmupSec < 0 {
+		cfg.WarmupSec = 0
+	}
+
+	subs := make([]*ClientRunner, 0, max(1, cfg.MaxSubs))
+	var subsMu sync.Mutex
+
+	// cumulative snapshots for deltas
+	var prevSubConnOK, prevSubConnFail, prevSubDisc, prevSubSubErr uint64
+	var prevPubConnOK, prevPubConnFail, prevPubDisc uint64
+	var prevPubsSent, prevPubsErr, prevMsgsRecv uint64
+
+	stageIdx := 0
+	stageStartAt := start
+	stageLastGoodSubs := 0
+	stageFailAt := 0
+	stageFailReason := ""
+	breaches := 0
+
+	stepIdx := 0
+	var summaries []EpochSummary
+
+	for {
+		select {
+		case <-runCtx.Done():
+			goto done
+		default:
+		}
+
+		if cfg.MaxSubs > 0 && targetSubs > cfg.MaxSubs {
+			targetSubs = cfg.MaxSubs
+		}
+
+		stepIdx++
+		atomic.StoreInt64(&ctr.SubsAttemptedTargetGauge, int64(targetSubs))
+
+		// Ensure subscribers up to targetSubs.
+		// ONLY newly created subscribers are pinned to brokerPool[stageIdx].
+		stageBroker := []Broker{brokerPool[stageIdx]}
+		subsMu.Lock()
+		for len(subs) < targetSubs {
+			id := len(subs)
+			r := NewSubscriber(cfg, stageBroker, id, &ctr, latCh)
+			subs = append(subs, r)
+			go r.Run(runCtx)
+		}
+		subsMu.Unlock()
+
+		windowStart := time.Now()
+		warmupUntil := windowStart.Add(time.Duration(cfg.WarmupSec) * time.Second)
+
+		windowLatMu.Lock()
+		windowLat = NewLatencyHist()
+		windowLatMu.Unlock()
+
+		discStartSub := atomic.LoadUint64(&ctr.SubDisc)
+		discStartPub := atomic.LoadUint64(&ctr.PubDisc)
+
+		select {
+		case <-runCtx.Done():
+			goto done
+		case <-time.After(time.Duration(cfg.WindowSec) * time.Second):
+		}
+
+		windowEnd := time.Now()
+		windowDur := windowEnd.Sub(windowStart)
+
+		connSubs := atomic.LoadInt64(&ctr.SubsConnected)
+		fullSubs := atomic.LoadInt64(&ctr.SubsFullySubscribed)
+		connPubs := atomic.LoadInt64(&ctr.PubsConnected)
+
+		curSubConnOK := atomic.LoadUint64(&ctr.SubConnOK)
+		curSubConnFail := atomic.LoadUint64(&ctr.SubConnFail)
+		curSubDisc := atomic.LoadUint64(&ctr.SubDisc)
+		curSubSubErr := atomic.LoadUint64(&ctr.SubSubErr)
+
+		curPubConnOK := atomic.LoadUint64(&ctr.PubConnOK)
+		curPubConnFail := atomic.LoadUint64(&ctr.PubConnFail)
+		curPubDisc := atomic.LoadUint64(&ctr.PubDisc)
+
+		curPubsSent := atomic.LoadUint64(&ctr.PubsSent)
+		curPubsErr := atomic.LoadUint64(&ctr.PubsErr)
+		curMsgsRecv := atomic.LoadUint64(&ctr.MsgsRecv)
+
+		dSubConnOK := curSubConnOK - prevSubConnOK
+		dSubConnFail := curSubConnFail - prevSubConnFail
+		dSubDisc := curSubDisc - prevSubDisc
+		dSubSubErr := curSubSubErr - prevSubSubErr
+
+		dPubConnOK := curPubConnOK - prevPubConnOK
+		dPubConnFail := curPubConnFail - prevPubConnFail
+		dPubDisc := curPubDisc - prevPubDisc
+
+		dPubsSent := curPubsSent - prevPubsSent
+		dPubsErr := curPubsErr - prevPubsErr
+		dMsgsRecv := curMsgsRecv - prevMsgsRecv
+
+		expected := uint64(0)
+		if fullSubs > 0 && dPubsSent > 0 {
+			expected = dPubsSent * uint64(fullSubs)
+		}
+		deliveryRatio := 0.0
+		if expected > 0 {
+			deliveryRatio = float64(dMsgsRecv) / float64(expected)
+		}
+
+		windowLatMu.Lock()
+		p50 := windowLat.Quantile(0.50)
+		p95 := windowLat.Quantile(0.95)
+		p99 := windowLat.Quantile(0.99)
+		windowLatMu.Unlock()
+
+		discEndSub := atomic.LoadUint64(&ctr.SubDisc)
+		discEndPub := atomic.LoadUint64(&ctr.PubDisc)
+		discDelta := (discEndSub - discStartSub) + (discEndPub - discStartPub)
+		discPerMin := 0.0
+		if windowDur > 0 {
+			discPerMin = float64(discDelta) / windowDur.Minutes()
+		}
+
+		// SLA evaluation (same as runEpoch)
+		slaBreached := false
+		slaReason := ""
+		if cfg.WarmupSec >= cfg.WindowSec {
+			// skip
+		} else if time.Now().After(warmupUntil) {
+			connectedPct := 100.0
+			if targetSubs > 0 {
+				connectedPct = (float64(connSubs) / float64(targetSubs)) * 100.0
+			}
+			deliveryPct := 100.0 * deliveryRatio
+
+			if targetSubs > 0 && connectedPct < cfg.MinConnectedSubPct {
+				slaBreached = true
+				slaReason = fmt.Sprintf("connected_subs_pct=%.2f < %.2f", connectedPct, cfg.MinConnectedSubPct)
+			} else if expected > 0 && deliveryPct < cfg.MinDeliveryRatioPct {
+				slaBreached = true
+				slaReason = fmt.Sprintf("delivery_pct=%.2f < %.2f", deliveryPct, cfg.MinDeliveryRatioPct)
+			} else if cfg.MaxP95LatencyMs > 0 && p95 > cfg.MaxP95LatencyMs {
+				slaBreached = true
+				slaReason = fmt.Sprintf("p95_ms=%.2f > %.2f", p95, cfg.MaxP95LatencyMs)
+			} else if cfg.MaxDiscPerMin > 0 && discPerMin > cfg.MaxDiscPerMin {
+				slaBreached = true
+				slaReason = fmt.Sprintf("disconnects_per_min=%.2f > %.2f", discPerMin, cfg.MaxDiscPerMin)
+			}
+		}
+
+		// Write row with epoch_index/brokers_used used to encode stage.
+		windowCSV.WriteRow(WindowRow{
+			TSUTC: time.Now().UTC().Format(time.RFC3339),
+
+			EpochIndex:  stageIdx + 1,
+			BrokersUsed: stageIdx + 1,
+
+			StepIndex: stepIdx,
+
+			TargetSubs: targetSubs,
+			TargetPubs: cfg.Publishers,
+
+			ConnectedSubs:       connSubs,
+			FullySubscribedSubs: fullSubs,
+			ConnectedPubs:       connPubs,
+
+			SubConnOK:   dSubConnOK,
+			SubConnFail: dSubConnFail,
+			SubDisc:     dSubDisc,
+			SubSubErr:   dSubSubErr,
+
+			PubConnOK:   dPubConnOK,
+			PubConnFail: dPubConnFail,
+			PubDisc:     dPubDisc,
+
+			PubsSent: dPubsSent,
+			PubsErr:  dPubsErr,
+			MsgsRecv: dMsgsRecv,
+			Expected: expected,
+
+			DeliveryRatio: deliveryRatio,
+
+			P50: p50,
+			P95: p95,
+			P99: p99,
+
+			DiscPerMin: discPerMin,
+
+			SLA_Breached: slaBreached,
+			SLA_Reason:   slaReason,
+		})
+
+		// update prev snapshots
+		prevSubConnOK, prevSubConnFail, prevSubDisc, prevSubSubErr = curSubConnOK, curSubConnFail, curSubDisc, curSubSubErr
+		prevPubConnOK, prevPubConnFail, prevPubDisc = curPubConnOK, curPubConnFail, curPubDisc
+		prevPubsSent, prevPubsErr, prevMsgsRecv = curPubsSent, curPubsErr, curMsgsRecv
+
+		if slaBreached {
+			breaches++
+		} else {
+			breaches = 0
+			stageLastGoodSubs = targetSubs
+		}
+
+		// On sustained breach: advance stage if possible, else stop
+		if breaches >= max(1, cfg.ConsecutiveBreaches) {
+			stageFailAt = targetSubs
+			stageFailReason = slaReason
+
+			if stageIdx < len(brokerPool)-1 {
+				// record stage summary
+				summaries = append(summaries, EpochSummary{
+					EpochIndex:  stageIdx + 1,
+					BrokersUsed: stageIdx + 1,
+					StartedAt:   stageStartAt,
+					FinishedAt:  time.Now(),
+
+					MaxSustainableSubs: stageLastGoodSubs,
+					FailAtSubs:         stageFailAt,
+					FailReason:         stageFailReason,
+					StoppedBySLA:       true,
+				})
+
+				// advance to next broker for NEW clients only
+				stageIdx++
+				stageStartAt = time.Now()
+				stageLastGoodSubs = targetSubs
+				stageFailAt = 0
+				stageFailReason = ""
+				breaches = 0
+
+				// continue ramping
+				if cfg.MaxSubs > 0 && targetSubs >= cfg.MaxSubs {
+					goto done
+				}
+				targetSubs += cfg.SubStep
+				continue
+			}
+
+			// last broker already in use -> stop
+			goto done
+		}
+
+		if cfg.MaxSubs > 0 && targetSubs >= cfg.MaxSubs {
+			goto done
+		}
+		targetSubs += cfg.SubStep
+	}
+
+done:
+	cancel()
+	_ = pubs // publishers run under ctx; silence
+
+	// finalize last stage summary
+	summaries = append(summaries, EpochSummary{
+		EpochIndex:  stageIdx + 1,
+		BrokersUsed: stageIdx + 1,
+		StartedAt:   stageStartAt,
+		FinishedAt:  time.Now(),
+
+		MaxSustainableSubs: stageLastGoodSubs,
+		FailAtSubs:         stageFailAt,
+		FailReason:         stageFailReason,
+		StoppedBySLA:       stageFailReason != "",
+	})
+
+	stopReason := "stopped: completed or time cap"
+	if stageFailReason != "" && stageIdx == len(brokerPool)-1 {
+		stopReason = "stopped: SLA failure on last broker (no more brokers to add)"
+	}
+	if runCtx.Err() == context.DeadlineExceeded || parent.Err() == context.DeadlineExceeded {
+		stopReason = "stopped: max-total-sec reached"
+	}
+	return summaries, stopReason, nil
 }
 
 /* =======================
@@ -957,7 +1255,8 @@ func main() {
 	flag.StringVar(&cfg.BrokerHost, "broker-host", getenv("BROKER_HOST", "127.0.0.1"), "Broker host (single mode)")
 	flag.IntVar(&cfg.BrokerPort, "broker-port", getenvInt("BROKER_PORT", 1883), "Broker port (single mode)")
 	flag.StringVar(&cfg.BrokersJSON, "brokers-json", getenv("BROKERS_JSON", ""), "Path to brokers.json for cluster mode")
-	flag.BoolVar(&cfg.ClusterIncremental, "cluster-incremental", false, "If true and brokers-json set: start with 1 broker and add broker per epoch after SLA failure")
+	flag.BoolVar(&cfg.ClusterIncremental, "cluster-incremental", false, "If true and brokers-json set: start with 1 broker and add broker per epoch after SLA failure (RESTART EPOCHS; unchanged)")
+	flag.BoolVar(&cfg.ClusterHotAddNewClients, "cluster-hot-add-new-clients", false, "NEW (S3): on SLA breach, advance broker stage and place ONLY new clients on next broker (no rebalance, no restart)")
 
 	// output
 	flag.StringVar(&cfg.TestName, "test-name", getenv("TEST_NAME", "mqtt-scale"), "Test name prefix for outputs")
@@ -971,10 +1270,10 @@ func main() {
 	flag.IntVar(&cfg.WarmupSec, "warmup-sec", 10, "Warmup per step (seconds)")
 
 	flag.IntVar(&cfg.MaxEpochSec, "max-epoch-sec", 1800, "Max seconds per broker-count epoch (safety)")
-	flag.IntVar(&cfg.MaxTotalSec, "max-total-sec", 7200, "Max seconds total across all epochs (safety)")
+	flag.IntVar(&cfg.MaxTotalSec, "max-total-sec", 7200, "Max seconds total (safety)")
 
 	// publishers
-	flag.IntVar(&cfg.Publishers, "publishers", 50, "Fixed number of publishers per epoch")
+	flag.IntVar(&cfg.Publishers, "publishers", 50, "Fixed number of publishers")
 	flag.Float64Var(&cfg.PubRatePerSec, "pub-rate", 1.0, "Publish rate per second per publisher (QoS0)")
 	flag.StringVar(&cfg.TopicPrefix, "topic-prefix", "bench/topic", "Topic prefix")
 	flag.IntVar(&cfg.TopicCount, "topic-count", 10, "Number of topics")
@@ -987,7 +1286,7 @@ func main() {
 	flag.Float64Var(&cfg.MaxP95LatencyMs, "sla-max-p95-ms", 500.0, "SLA: p95 latency <= this (ms)")
 	flag.Float64Var(&cfg.MaxDiscPerMin, "sla-max-disc-per-min", 50.0, "SLA: disconnects per minute <= this")
 
-	flag.IntVar(&cfg.ConsecutiveBreaches, "sla-consecutive-breaches", 2, "Stop step after this many consecutive SLA-breaching windows")
+	flag.IntVar(&cfg.ConsecutiveBreaches, "sla-consecutive-breaches", 2, "Stop after this many consecutive SLA-breaching windows")
 
 	flag.Parse()
 
@@ -1012,6 +1311,9 @@ func main() {
 	}
 	if cfg.ConsecutiveBreaches <= 0 {
 		cfg.ConsecutiveBreaches = 1
+	}
+	if cfg.ClusterHotAddNewClients && cfg.ClusterIncremental {
+		log.Fatalf("choose only one of --cluster-hot-add-new-clients or --cluster-incremental")
 	}
 	if err := os.MkdirAll(cfg.OutDir, 0o755); err != nil {
 		log.Fatalf("failed to create out dir: %v", err)
@@ -1047,10 +1349,12 @@ func main() {
 	var epochs []EpochSummary
 	stopReason := ""
 
-	// Decide epoch plan:
+	// Decide plan:
 	// - If no brokers.json => single epoch (activeBrokers empty => uses cfg.BrokerHost:Port)
-	// - If brokers.json and cluster-incremental => epochs for k=1..B
-	// - If brokers.json and NOT incremental => one epoch with all brokers
+	// - If brokers.json and hot-add-new-clients => S3 new logic
+	// - If brokers.json and cluster-incremental => restart epochs k=1..B (unchanged)
+	// - If brokers.json and NOT incremental => one epoch with all brokers (unchanged)
+
 	if len(brokerPool) == 0 {
 		log.Printf("mode=single broker=%s:%d publishers=%d pub_rate=%.3f payload=%dB",
 			cfg.BrokerHost, cfg.BrokerPort, cfg.Publishers, cfg.PubRatePerSec, cfg.PayloadBytes)
@@ -1063,7 +1367,15 @@ func main() {
 			stopReason = "stopped: completed or time cap"
 		}
 	} else {
-		if cfg.ClusterIncremental {
+		if cfg.ClusterHotAddNewClients {
+			log.Printf("mode=cluster hot-add-new-clients-only total_brokers=%d publishers=%d pub_rate=%.3f payload=%dB",
+				len(brokerPool), cfg.Publishers, cfg.PubRatePerSec, cfg.PayloadBytes)
+
+			ep, reason, _ := runHotAddNewClientsOnly(parentCtx, cfg, brokerPool, windowCSV)
+			epochs = append(epochs, ep...)
+			stopReason = reason
+
+		} else if cfg.ClusterIncremental {
 			log.Printf("mode=cluster incremental total_brokers=%d publishers=%d pub_rate=%.3f payload=%dB",
 				len(brokerPool), cfg.Publishers, cfg.PubRatePerSec, cfg.PayloadBytes)
 
@@ -1081,21 +1393,17 @@ func main() {
 				res, _ := runEpoch(parentCtx, cfg, k, active, windowCSV)
 				epochs = append(epochs, res.Summary)
 
-				// If this epoch did NOT fail SLA, you can consider this "enough capacity" for this broker count,
-				// but we still proceed to next broker per your requirement only when SLA is reached.
-				// Requirement: "add new broker when bad SLA is reached" => we only add broker AFTER SLA failure.
-				// So if it didn't fail (hit max-subs or time cap), we stop early.
+				// Requirement for restart-epoch incremental mode: add broker AFTER SLA failure
 				if !res.Summary.StoppedBySLA {
 					stopReason = fmt.Sprintf("stopped: epoch brokers_used=%d did not breach SLA (hit cap/time)", k)
 					goto finish
 				}
-
-				// If SLA failed and we have more brokers, continue to next epoch with k+1 brokers.
 				if k == len(brokerPool) {
 					stopReason = "stopped: SLA failure even with all brokers active"
 					goto finish
 				}
 			}
+
 		} else {
 			log.Printf("mode=cluster fixed brokers_used=%d publishers=%d pub_rate=%.3f payload=%dB",
 				len(brokerPool), cfg.Publishers, cfg.PubRatePerSec, cfg.PayloadBytes)
@@ -1152,13 +1460,6 @@ func getenvInt(k string, def int) int {
 		return def
 	}
 	return n
-}
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
 }
 
 func max(a, b int) int {

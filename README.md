@@ -129,23 +129,47 @@ Example:
 
 ## Tests
 
-| Scenario ID | Scenario Name                                          | Broker Mode | Broker Scale Strategy     | Initial Brokers | Max Brokers | Subscriber Strategy | Subscriber Step | Initial Subs | Max Subs | Publisher Strategy | Publishers | Publish Rate / Pub | QoS | Payload (Bytes) | Topics | Hold Window (s) | Warmup (s) | Primary Stop SLA             | Secondary Stop SLAs                                     | Notes                |
-| ----------- | ------------------------------------------------------ | ----------- | ------------------------- | --------------- | ----------- | ------------------- | --------------- | ------------ | -------- | ------------------ | ---------- | ------------------ | --- | --------------- | ------ | --------------- | ---------- | ---------------------------- | ------------------------------------------------------- | -------------------- |
-| S1-P10      | Single Broker – Sub Scaling (10B)                      | Single      | None                      | 1               | 1           | Ramp subscribers    | +100            | N            | M        | Fixed              | P          | R msg/s            | 0   | 10              | T      | 60              | 30         | p95 latency > SLA            | delivery <99%, connected subs <99%, disconnects/min > X | Baseline capacity    |
-| S1-P100     | Single Broker – Sub Scaling (100B)                     | Single      | None                      | 1               | 1           | Ramp subscribers    | +100            | N            | M        | Fixed              | P          | R msg/s            | 0   | 100             | T      | 60              | 30         | p95 latency > SLA            | delivery <99%, connected subs <99%, disconnects/min > X | Payload impact       |
-| S1-P1000    | Single Broker – Sub Scaling (1000B)                    | Single      | None                      | 1               | 1           | Ramp subscribers    | +100            | N            | M        | Fixed              | P          | R msg/s            | 0   | 1000            | T      | 60              | 30         | p95 latency > SLA            | delivery <99%, connected subs <99%, disconnects/min > X | Large payload        |
-| S2-P10      | Clustered – Fixed Brokers – Sub Scaling (10B)          | Cluster     | Fixed broker set          | K               | K           | Ramp subscribers    | +100            | N            | M        | Fixed              | P          | R msg/s            | 0   | 10              | T      | 60              | 30         | p95 latency > SLA            | delivery <99%, connected subs <99%, disconnects/min > X | Distribution effects |
-| S2-P100     | Clustered – Fixed Brokers – Sub Scaling (100B)         | Cluster     | Fixed broker set          | K               | K           | Ramp subscribers    | +100            | N            | M        | Fixed              | P          | R msg/s            | 0   | 100             | T      | 60              | 30         | p95 latency > SLA            | delivery <99%, connected subs <99%, disconnects/min > X | Scaling vs payload   |
-| S2-P1000    | Clustered – Fixed Brokers – Sub Scaling (1000B)        | Cluster     | Fixed broker set          | K               | K           | Ramp subscribers    | +100            | N            | M        | Fixed              | P          | R msg/s            | 0   | 1000            | T      | 60              | 30         | p95 latency > SLA            | delivery <99%, connected subs <99%, disconnects/min > X | Upper bound          |
-| S3-P10      | Clustered – Incremental Broker Scale (10B)             | Cluster     | Add broker on SLA failure | 1               | B           | Ramp subscribers    | +100            | N            | M        | Fixed              | P          | R msg/s            | 0   | 10              | T      | 60              | 30         | SLA fail w/ all brokers used | same as above                                           | Staircase scaling    |
-| S3-P100     | Clustered – Incremental Broker Scale (100B)            | Cluster     | Add broker on SLA failure | 1               | B           | Ramp subscribers    | +100            | N            | M        | Fixed              | P          | R msg/s            | 0   | 100             | T      | 60              | 30         | SLA fail w/ all brokers used | same as above                                           | Capacity gains       |
-| S3-P1000    | Clustered – Incremental Broker Scale (1000B)           | Cluster     | Add broker on SLA failure | 1               | B           | Ramp subscribers    | +100            | N            | M        | Fixed              | P          | R msg/s            | 0   | 1000            | T      | 60              | 30         | SLA fail w/ all brokers used | same as above                                           | Diminishing returns  |
-| S4S-P10     | Single Broker – Throughput Scaling (10B)               | Single      | None                      | 1               | 1           | Fixed subscribers   | —               | S            | S        | Ramp publish rate  | P          | +ΔR msg/s          | 0   | 10              | T      | 60              | 30         | p95 latency > SLA            | delivery <99%                                           | Throughput ceiling   |
-| S4S-P100    | Single Broker – Throughput Scaling (100B)              | Single      | None                      | 1               | 1           | Fixed subscribers   | —               | S            | S        | Ramp publish rate  | P          | +ΔR msg/s          | 0   | 100             | T      | 60              | 30         | p95 latency > SLA            | delivery <99%                                           | Payload effect       |
-| S4S-P1000   | Single Broker – Throughput Scaling (1000B)             | Single      | None                      | 1               | 1           | Fixed subscribers   | —               | S            | S        | Ramp publish rate  | P          | +ΔR msg/s          | 0   | 1000            | T      | 60              | 30         | p95 latency > SLA            | delivery <99%                                           | Bandwidth limit      |
-| S4C-P10     | Clustered – Fixed Brokers – Throughput Scaling (10B)   | Cluster     | Fixed broker set          | K               | K           | Fixed subscribers   | —               | S            | S        | Ramp publish rate  | P          | +ΔR msg/s          | 0   | 10              | T      | 60              | 30         | p95 latency > SLA            | delivery <99%                                           | Throughput ceiling   |
-| S4C-P100    | Clustered – Fixed Brokers – Throughput Scaling (100B)  | Cluster     | Fixed broker set          | K               | K           | Fixed subscribers   | —               | S            | S        | Ramp publish rate  | P          | +ΔR msg/s          | 0   | 100             | T      | 60              | 30         | p95 latency > SLA            | delivery <99%                                           | Payload effect       |
-| S4C-P1000   | Clustered – Fixed Brokers – Throughput Scaling (1000B) | Cluster     | Fixed broker set          | K               | K           | Fixed subscribers   | —               | S            | S        | Ramp publish rate  | P          | +ΔR msg/s          | 0   | 1000            | T      | 60              | 30         | p95 latency > SLA            | delivery <99%                                           | Bandwidth limit      |
+### Common Setup
+
+| Subscriber Step    | 100   |
+| ------------------ | ----- |
+| Initital Subs      | 500   |
+| Max Subs           | 20000 |
+| Publisher Strategy | Fixed |
+| Publishers         | 50    |
+| Publish Rate / Pub | 1     |
+| QoS                | 0     |
+| Topic Count        | 10    |
+| Warmup (s)         | 30    |
+| Window (s)         | 60    |
+
+### Test Scenarios
+
+| Scenario ID | Scenario Name                                   | Broker Mode | Broker Scale Strategy     | Initial Brokers | Max Brokers | Payload (Bytes) |
+| ----------- | ----------------------------------------------- | ----------- | ------------------------- | --------------- | ----------- | --------------- |
+| S1-P10      | Single Broker – Sub Scaling (10B)               | Single      | None                      | 1               | 1           | 10              |
+| S1-P100     | Single Broker – Sub Scaling (100B)              | Single      | None                      | 1               | 1           | 100             |
+| S1-P1000    | Single Broker – Sub Scaling (1000B)             | Single      | None                      | 1               | 1           | 1000            |
+| S2-P10      | Clustered – Fixed Brokers – Sub Scaling (10B)   | Cluster     | Fixed broker set          | 3               | 3           | 10              |
+| S2-P100     | Clustered – Fixed Brokers – Sub Scaling (100B)  | Cluster     | Fixed broker set          | 3               | 3           | 100             |
+| S2-P1000    | Clustered – Fixed Brokers – Sub Scaling (1000B) | Cluster     | Fixed broker set          | 3               | 3           | 1000            |
+| S3-P10      | Clustered – Incremental Broker Scale (10B)      | Cluster     | Add broker on SLA failure | 1               | 3           | 10              |
+| S3-P100     | Clustered – Incremental Broker Scale (100B)     | Cluster     | Add broker on SLA failure | 1               | 3           | 100             |
+| S3-P1000    | Clustered – Incremental Broker Scale (1000B)    | Cluster     | Add broker on SLA failure | 1               | 3           | 1000            |
+
+### SLA Metrics
+
+| Scenario ID | Primary Stop SLA             | Secondary Stop SLAs                                     | Notes                |
+| ----------- | ---------------------------- | ------------------------------------------------------- | -------------------- |
+| S1-P10      | p95 latency > SLA            | delivery <99%, connected subs <99%, disconnects/min > X | Baseline capacity    |
+| S1-P100     | p95 latency > SLA            | delivery <99%, connected subs <99%, disconnects/min > X | Payload impact       |
+| S1-P1000    | p95 latency > SLA            | delivery <99%, connected subs <99%, disconnects/min > X | Large payload        |
+| S2-P10      | p95 latency > SLA            | delivery <99%, connected subs <99%, disconnects/min > X | Distribution effects |
+| S2-P100     | p95 latency > SLA            | delivery <99%, connected subs <99%, disconnects/min > X | Scaling vs payload   |
+| S2-P1000    | p95 latency > SLA            | delivery <99%, connected subs <99%, disconnects/min > X | Upper bound          |
+| S3-P10      | SLA fail w/ all brokers used | same as above                                           | Staircase scaling    |
+| S3-P100     | SLA fail w/ all brokers used | same as above                                           | Capacity gains       |
+| S3-P1000    | SLA fail w/ all brokers used | same as above                                           | Diminishing returns  |
 
 ### Test Commands:
 
@@ -239,18 +263,17 @@ go run main.go \
 
 #### S3 — Cluster Incremental: Add broker when SLA fails
 
-> Starts with 1 broker, ramps subscribers until SLA fails, then restarts epoch with 2 brokers, etc.
-
 ##### S3-P10
 
 ```bash
 go run main.go \
-  --brokers-json=./brokers.json --cluster-incremental=true \
-  --out-dir=./results --test-name=S3-P10_cluster_incremental_subscale_10B \
+  --brokers-json=./brokers.json \
+  --cluster-hot-add-new-clients=true \
+  --out-dir=./results --test-name=S3-P10_cluster_hotadd_new_clients_only_10B \
   --initial-subs=500 --sub-step=100 --max-subs=20000 \
   --publishers=50 --pub-rate=1 \
   --payload-bytes=10 --topic-count=10 --topic-prefix=bench/topic \
-  --window-sec=60 --warmup-sec=10 \
+  --window-sec=60 --warmup-sec=30 \
   --sla-min-connected-sub-pct=99 --sla-min-delivery-pct=99 --sla-max-p95-ms=200 --sla-max-disc-per-min=50 \
   --sla-consecutive-breaches=2
 ```
@@ -258,13 +281,14 @@ go run main.go \
 ##### S3-P100
 
 ```bash
-go run main.go \
-  --brokers-json=./brokers.json --cluster-incremental=true \
-  --out-dir=./results --test-name=S3-P100_cluster_incremental_subscale_100B \
+go run mqtt_scale_tester.go \
+  --brokers-json=./brokers.json \
+  --cluster-hot-add-new-clients=true \
+  --out-dir=./results --test-name=S3-P100_cluster_hotadd_new_clients_only_100B \
   --initial-subs=500 --sub-step=100 --max-subs=20000 \
   --publishers=50 --pub-rate=1 \
   --payload-bytes=100 --topic-count=10 --topic-prefix=bench/topic \
-  --window-sec=60 --warmup-sec=10 \
+  --window-sec=60 --warmup-sec=30 \
   --sla-min-connected-sub-pct=99 --sla-min-delivery-pct=99 --sla-max-p95-ms=200 --sla-max-disc-per-min=50 \
   --sla-consecutive-breaches=2
 ```
@@ -272,13 +296,14 @@ go run main.go \
 ##### S3-P1000
 
 ```bash
-go run main.go \
-  --brokers-json=./brokers.json --cluster-incremental=true \
-  --out-dir=./results --test-name=S3-P1000_cluster_incremental_subscale_1000B \
+go run mqtt_scale_tester.go \
+  --brokers-json=./brokers.json \
+  --cluster-hot-add-new-clients=true \
+  --out-dir=./results --test-name=S3-P1000_cluster_hotadd_new_clients_only_1000B \
   --initial-subs=500 --sub-step=100 --max-subs=20000 \
   --publishers=50 --pub-rate=1 \
   --payload-bytes=1000 --topic-count=10 --topic-prefix=bench/topic \
-  --window-sec=60 --warmup-sec=10 \
+  --window-sec=60 --warmup-sec=30 \
   --sla-min-connected-sub-pct=99 --sla-min-delivery-pct=99 --sla-max-p95-ms=200 --sla-max-disc-per-min=50 \
   --sla-consecutive-breaches=2
 ```
