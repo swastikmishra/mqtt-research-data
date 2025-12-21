@@ -154,7 +154,7 @@ Example:
 ##### S1-P10
 
 ```bash
-go run mqtt_scale_tester.go \
+go run main.go \
   --broker-host=43.205.176.30 --broker-port=1883 \
   --out-dir=./results --test-name=S1-P10_single_subscale_10B \
   --initial-subs=500 --sub-step=100 --max-subs=20000 \
@@ -168,7 +168,7 @@ go run mqtt_scale_tester.go \
 ##### S1-P100
 
 ```bash
-go run mqtt_scale_tester.go \
+go run main.go \
   --broker-host=43.205.176.30 --broker-port=1883 \
   --out-dir=./results --test-name=S1-P100_single_subscale_100B \
   --initial-subs=500 --sub-step=100 --max-subs=20000 \
@@ -182,7 +182,7 @@ go run mqtt_scale_tester.go \
 ##### S1-P1000
 
 ```bash
-go run mqtt_scale_tester.go \
+go run main.go \
   --broker-host=43.205.176.30 --broker-port=1883 \
   --out-dir=./results --test-name=S1-P1000_single_subscale_1000B \
   --initial-subs=500 --sub-step=100 --max-subs=20000 \
@@ -198,7 +198,7 @@ go run mqtt_scale_tester.go \
 ##### S2-P10
 
 ```bash
-go run mqtt_scale_tester.go \
+go run main.go \
   --brokers-json=./brokers.json --cluster-incremental=false \
   --out-dir=./results --test-name=S2-P10_cluster_fixed_subscale_10B \
   --initial-subs=500 --sub-step=100 --max-subs=20000 \
@@ -212,7 +212,7 @@ go run mqtt_scale_tester.go \
 ##### S2-P100
 
 ```bash
-go run mqtt_scale_tester.go \
+go run main.go \
   --brokers-json=./brokers.json --cluster-incremental=false \
   --out-dir=./results --test-name=S2-P100_cluster_fixed_subscale_100B \
   --initial-subs=500 --sub-step=100 --max-subs=20000 \
@@ -226,7 +226,7 @@ go run mqtt_scale_tester.go \
 ##### S2-P1000
 
 ```bash
-go run mqtt_scale_tester.go \
+go run main.go \
   --brokers-json=./brokers.json --cluster-incremental=false \
   --out-dir=./results --test-name=S2-P1000_cluster_fixed_subscale_1000B \
   --initial-subs=500 --sub-step=100 --max-subs=20000 \
@@ -244,7 +244,7 @@ go run mqtt_scale_tester.go \
 ##### S3-P10
 
 ```bash
-go run mqtt_scale_tester.go \
+go run main.go \
   --brokers-json=./brokers.json --cluster-incremental=true \
   --out-dir=./results --test-name=S3-P10_cluster_incremental_subscale_10B \
   --initial-subs=500 --sub-step=100 --max-subs=20000 \
@@ -258,7 +258,7 @@ go run mqtt_scale_tester.go \
 ##### S3-P100
 
 ```bash
-go run mqtt_scale_tester.go \
+go run main.go \
   --brokers-json=./brokers.json --cluster-incremental=true \
   --out-dir=./results --test-name=S3-P100_cluster_incremental_subscale_100B \
   --initial-subs=500 --sub-step=100 --max-subs=20000 \
@@ -272,7 +272,7 @@ go run mqtt_scale_tester.go \
 ##### S3-P1000
 
 ```bash
-go run mqtt_scale_tester.go \
+go run main.go \
   --brokers-json=./brokers.json --cluster-incremental=true \
   --out-dir=./results --test-name=S3-P1000_cluster_incremental_subscale_1000B \
   --initial-subs=500 --sub-step=100 --max-subs=20000 \
