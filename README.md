@@ -177,7 +177,7 @@ Example:
 ```bash
 go run main.go \
  --test-name=SP10_MaxConn \
- --broker-host=43.205.176.30 --broker-port=1883 \
+ --broker-host=13.126.39.164 --broker-port=1883 \
  --cluster-hot-add-new-clients=false \
  --payload-bytes=10 \
  --initial-subs=500 --sub-step=500 --max-subs=20000 \
@@ -194,7 +194,7 @@ go run main.go \
 ```bash
 go run main.go \
  --test-name=SP100_Stability \
- --broker-host=43.205.176.30 --broker-port=1883 \
+ --broker-host=13.126.39.164 --broker-port=1883 \
  --cluster-hot-add-new-clients=false \
  --payload-bytes=100 \
  --initial-subs=500 --sub-step=500 --max-subs=20000 \
@@ -211,7 +211,7 @@ go run main.go \
 ```bash
 go run main.go \
  --test-name=SP1000_Throughput \
---broker-host=43.205.176.30 --broker-port=1883 \
+--broker-host=13.126.39.164 --broker-port=1883 \
  --cluster-hot-add-new-clients=false \
  --payload-bytes=1000 \
  --initial-subs=500 --sub-step=500 --max-subs=20000 \
@@ -230,7 +230,7 @@ go run main.go \
 ```bash
 go run main.go \
  --test-name=CP10_ClusterConn \
- --brokers-json=./brokers2.json \
+ --brokers-json=./brokers.json \
  --cluster-hot-add-new-clients=true \
  --payload-bytes=10 \
  --initial-subs=500 --sub-step=500 --max-subs=40000 \
@@ -247,7 +247,7 @@ go run main.go \
 ```bash
 go run main.go \
  --test-name=CP100_ClusterStability \
- --brokers-json=./brokers2.json \
+ --brokers-json=./brokers.json \
  --cluster-hot-add-new-clients=true \
  --payload-bytes=100 \
  --initial-subs=500 --sub-step=500 --max-subs=20000 \
@@ -264,7 +264,7 @@ go run main.go \
 ```bash
 go run main.go \
  --test-name=CP1000_ClusterThroughput \
- --brokers-json=./brokers2.json \
+ --brokers-json=./brokers.json \
  --cluster-hot-add-new-clients=true \
  --payload-bytes=1000 \
  --initial-subs=500 --sub-step=500 --max-subs=20000 \
